@@ -97,36 +97,36 @@
     </div>
 
     <script>
-       function sendLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-            const latitude = position.coords.latitude;
-            const longitude = position.coords.longitude;
-            
-            console.log("Latitude: " + latitude + ", Longitude: " + longitude);  // Log this to verify
+        function sendLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
 
-            fetch('https://surakshit.onrender.com/send_location', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ latitude: latitude, longitude: longitude })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('message').innerText = data.message;
-                document.getElementById('send-location-button').style.display = 'none';
-                document.getElementById('department-buttons').style.display = 'block';
-            })
-            .catch(error => console.error('Error:', error));
-        }, function(error) {
-            document.getElementById('message').innerText = "Error getting location: " + error.message;
-        });
-    } else {
-        document.getElementById('message').innerText = "Geolocation is not supported by this browser.";
-    }
-}
+                    // Log the latitude and longitude to console for debugging
+                    console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
 
+                    fetch('https://surakshit.onrender.com/send_location', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ latitude: latitude, longitude: longitude })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('message').innerText = data.message;
+                        document.getElementById('send-location-button').style.display = 'none';
+                        document.getElementById('department-buttons').style.display = 'block';
+                    })
+                    .catch(error => console.error('Error:', error));
+                }, function(error) {
+                    document.getElementById('message').innerText = "Error getting location: " + error.message;
+                });
+            } else {
+                document.getElementById('message').innerText = "Geolocation is not supported by this browser.";
+            }
+        }
 
         function sendAlert(department) {
             fetch('https://surakshit.onrender.com/send_alert', {
@@ -138,13 +138,13 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('message').innerText = `Alert sent to ${department.charAt(0).toUpperCase() + department.slice(1)}`;
+                document.getElementById('message').innerText = data.message;
                 document.getElementById('department-buttons').style.display = 'none';
 
                 const departmentImages = {
                     ambulance: 'images/ambulance.jpg',
                     firefighter: 'images/firefighter.jpg',
-                    rescue: 'images/rescuer.jpg',
+                    rescue: 'images/rescue.jpg',
                     police: 'images/police.jpg'
                 };
 
