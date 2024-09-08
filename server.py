@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
 
@@ -12,6 +12,11 @@ alerts = {
     "rescue": "Rescue",
     "police": "Police"
 }
+
+# Serve index.html at the root URL
+@app.route('/')
+def serve_index():
+    return send_from_directory('.', 'index.html')
 
 @app.route('/send_location', methods=['POST'])
 def send_location():
