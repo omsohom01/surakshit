@@ -103,7 +103,7 @@
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
                     
-                    fetch('http://localhost:5000/send_location', {
+                    fetch('https://surakshit.onrender.com/send_location', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -126,7 +126,7 @@
         }
 
         function sendAlert(department) {
-            fetch('http://localhost:5000/send_alert', {
+            fetch('https://surakshit.onrender.com/send_alert', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
