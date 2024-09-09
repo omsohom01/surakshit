@@ -1,8 +1,13 @@
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='images', template_folder='.')
 CORS(app)
+
+# Route to serve the index.html page
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 # Dictionary to store department alerts
 alerts = {
@@ -11,10 +16,6 @@ alerts = {
     "rescue": "Rescue",
     "police": "Police"
 }
-
-@app.route('/')
-def index():
-    return "Server is running."
 
 @app.route('/send_location', methods=['POST'])
 def send_location():
@@ -27,7 +28,7 @@ def send_location():
         print(f"Received location: Latitude {latitude}, Longitude {longitude}")
         
         # Confirm receipt of location
-        return jsonify({'message': 'Location received'})
+        return jsonify({'message': f"Location received: Latitude {latitude}, Longitude {longitude}"})
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({'message': 'Error processing location'}), 500
