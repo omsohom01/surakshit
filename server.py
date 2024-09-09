@@ -5,6 +5,16 @@ import os
 app = Flask(__name__)
 CORS(app)
 
+# Serve the index.html directly
+@app.route('/')
+def serve_index():
+    return send_from_directory('', 'index.html')
+
+# Serve images from the 'images' directory
+@app.route('/images/<path:filename>')
+def serve_image(filename):
+    return send_from_directory('images', filename)
+
 # Dictionary to store department alerts
 alerts = {
     "ambulance": "Ambulance",
@@ -13,11 +23,6 @@ alerts = {
     "police": "Police"
 }
 
-# Serve index.html at the root URL
-@app.route('/')
-def serve_index():
-    return send_from_directory('.', 'index.html')
-
 @app.route('/send_location', methods=['POST'])
 def send_location():
     try:
@@ -25,7 +30,7 @@ def send_location():
         latitude = data.get('latitude')
         longitude = data.get('longitude')
         
-        # Print location data to console
+        # Log location data to the console
         print(f"Received location: Latitude {latitude}, Longitude {longitude}")
         
         # Confirm receipt of location
@@ -42,7 +47,7 @@ def send_alert():
         
         if department in alerts:
             message = f"Alert sent to {alerts[department]}"
-            # Print alert message to console
+            # Log alert message to console
             print(message)
             return jsonify({'message': message})
         else:
@@ -52,5 +57,4 @@ def send_alert():
         return jsonify({'message': 'Error processing alert'}), 500
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # Default to 5000 if no PORT env variable is set
-    app.run(host='0.0.0.0', port=port)
+    app.run(debug=True)
