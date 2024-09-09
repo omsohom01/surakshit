@@ -97,33 +97,28 @@
     </div>
 
     <script>
-        function sendLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    const latitude = position.coords.latitude;
-                    const longitude = position.coords.longitude;
-                    
-                    fetch('/send_location', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ latitude: latitude, longitude: longitude })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById('message').innerText = data.message;
-                        document.getElementById('send-location-button').style.display = 'none';
-                        document.getElementById('department-buttons').style.display = 'block';
-                    })
-                    .catch(error => console.error('Error:', error));
-                }, function(error) {
-                    document.getElementById('message').innerText = "Error getting location: " + error.message;
-                });
-            } else {
-                document.getElementById('message').innerText = "Geolocation is not supported by this browser.";
-            }
-        }
+       function sendLocation() {
+    navigator.geolocation.getCurrentPosition(function(position) {
+        fetch('/send_location', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    });
+}
+
 
         function sendAlert(department) {
             fetch('/send_alert', {
