@@ -1,12 +1,8 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-import os
 
 app = Flask(__name__)
 CORS(app)
-
-# Directory for serving static files
-app.config['STATIC_FOLDER'] = 'images'
 
 # Dictionary to store department alerts
 alerts = {
@@ -25,7 +21,6 @@ def send_location():
     try:
         data = request.get_json()
         if data is None:
-            print("No data received.")
             return jsonify({'message': 'No data received'}), 400
         
         latitude = data.get('latitude')
@@ -35,10 +30,9 @@ def send_location():
         print(f"Received location data: Latitude={latitude}, Longitude={longitude}")
         
         if latitude is None or longitude is None:
-            print("Latitude or Longitude missing.")
             return jsonify({'message': 'Latitude or Longitude missing'}), 400
         
-        # Confirm receipt of location
+        # Respond to confirm receipt of location
         return jsonify({'message': 'Location received'})
     except Exception as e:
         print(f"Error processing location: {e}")
@@ -49,7 +43,6 @@ def send_alert():
     try:
         data = request.get_json()
         if data is None:
-            print("No data received.")
             return jsonify({'message': 'No data received'}), 400
         
         department = data.get('department')
@@ -60,7 +53,6 @@ def send_alert():
             print(message)
             return jsonify({'message': message})
         else:
-            print("Invalid department.")
             return jsonify({'message': 'Invalid department'}), 400
     except Exception as e:
         print(f"Error processing alert: {e}")
