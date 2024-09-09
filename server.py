@@ -1,42 +1,61 @@
-from flask import Flask, send_from_directory, request
+from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
 import os
 
 app = Flask(__name__)
+CORS(app)
 
-# Serve index.html from root folder
+# Directory for serving static files
+app.config['STATIC_FOLDER'] = 'images'
+
+# Dictionary to store department alerts
+alerts = {
+    "ambulance": "Ambulance",
+    "firefighter": "Firefighter",
+    "rescue": "Rescue",
+    "police": "Police"
+}
+
 @app.route('/')
 def index():
-    return send_from_directory(os.getcwd(), 'index.html')
+    return send_from_directory('', 'index.html')
 
-# Serve images from the 'images' folder
-@app.route('/images/<path:filename>')
-def serve_images(filename):
-    return send_from_directory(os.path.join(os.getcwd(), 'images'), filename)
-
-# Handle the send location route
 @app.route('/send_location', methods=['POST'])
 def send_location():
-    data = request.json
-    latitude = data.get('latitude')
-    longitude = data.get('longitude')
-    
-    if latitude and longitude:
-        print(f"Received location: Latitude={latitude}, Longitude={longitude}")
-        return "Location received successfully!", 200
-    else:
-        return "Location data is missing!", 400
+    try:
+        data = request.get_json()
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        
+        # Print location data to console
+        print(f"Received location: Latitude {latitude}, Longitude {longitude}")
+        
+        # Confirm receipt of location
+        return jsonify({'message': 'Location received'})
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({'message': 'Error processing location'}), 500
 
-# Handle the send alert route
 @app.route('/send_alert', methods=['POST'])
 def send_alert():
-    data = request.json
-    department = data.get('department')
+    try:
+        data = request.get_json()
+        department = data.get('department')
+        
+        if department in alerts:
+            message = f"Alert sent to {alerts[department]}"
+            # Print alert message to console
+            print(message)
+            return jsonify({'message': message})
+        else:
+            return jsonify({'message': 'Invalid department'}), 400
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({'message': 'Error processing alert'}), 500
 
-    if department:
-        print(f"Alert from department: {department}")
-        return f"Alert received from {department}", 200
-    else:
-        return "Department not specified!", 400
+@app.route('/images/<path:filename>')
+def serve_image(filename):
+    return send_from_directory('images', filename)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0', port=5000)
