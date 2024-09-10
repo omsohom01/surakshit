@@ -1,44 +1,46 @@
-from flask import Flask, request, jsonify, render_template
-from geopy.geocoders import Nominatim  # Import the Nominatim geocoder from Geopy
+from flask import Flask, request, send_file, jsonify
+from flask_cors import CORS
+from geopy.geocoders import Nominatim
 
 app = Flask(__name__)
+CORS(app)
 
-# Create a geolocator instance
 geolocator = Nominatim(user_agent="geoapiExercises")
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return send_file('index.html')  # Serve index.html directly
+
+@app.route('/images/<image_name>')
+def serve_image(image_name):
+    # Serve images from the images folder
+    return send_file(f'images/{image_name}')
 
 @app.route('/send_location', methods=['POST'])
 def send_location():
-    data = request.get_json()
-    latitude = data['latitude']
-    longitude = data['longitude']
-
-    # Reverse geocoding to get the address
-    try:
-        location = geolocator.reverse(f"{latitude}, {longitude}")
-        address = location.address if location else "Address not found"
-    except Exception as e:
-        address = "Error in finding address"
-
-    # Print the address on the server
-    print(f"Client's Address: {address}")
-
-    # Return the address to the client
-    return jsonify({'status': 'Location received', 'address': address})
+    data = request.json
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+    
+    # Convert coordinates to an address
+    location = geolocator.reverse(f"{latitude}, {longitude}", language='en')
+    if location:
+        address = location.address
+    else:
+        address = "Address not found"
+    
+    print(f"Received coordinates: {latitude}, {longitude}")
+    print(f"Resolved address: {address}")
+    
+    return jsonify({'message': f'Location received: {address}'})
 
 @app.route('/send_alert', methods=['POST'])
 def send_alert():
-    alert_data = request.get_json()
-    department = alert_data.get('department', 'Unknown')
-    message = alert_data.get('message', 'No message')
-
-    # Print the alert details
-    print(f"Emergency alert received from {department} department: {message}")
-
-    return jsonify({'status': 'Alert received', 'message': message, 'department': department})
+    data = request.json
+    department = data.get('department')
+    print(f"Alert received for {department} department")
+    
+    return jsonify({'message': f'Alert received for {department}'})
 
 if __name__ == '__main__':
     app.run(debug=True)
