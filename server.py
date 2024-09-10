@@ -1,41 +1,42 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from geopy.geocoders import Nominatim
 import os
 
 app = Flask(__name__)
-CORS(app)  # Allow cross-origin requests
+CORS(app)  # Enable CORS for all origins
+
 geolocator = Nominatim(user_agent="emergency_alert_system")
 
 @app.route('/')
 def index():
-    return app.send_static_file('index.html')
+    return send_from_directory('', 'index.html')
 
 @app.route('/send_location', methods=['POST'])
 def send_location():
-    data = request.json
+    data = request.get_json()
     latitude = data.get('latitude')
     longitude = data.get('longitude')
     
-    # Convert coordinates to an address
-    location = geolocator.reverse(f"{latitude}, {longitude}", language='en')
-    if location:
-        address = location.address
-    else:
-        address = "Address not found"
+    # Convert coordinates to address
+    location = geolocator.reverse(f"{latitude}, {longitude}")
+    address = location.address if location else "Address not found"
     
-    # Log the coordinates and resolved address
-    print(f"Received coordinates: {latitude}, {longitude}")
-    print(f"Resolved address: {address}")
-    
-    return jsonify({'message': f'Location received: {address}'})
+    # Log the coordinates and address
+    print(f"Received location: Latitude = {latitude}, Longitude = {longitude}")
+    print(f"Address: {address}")
+
+    return jsonify({'message': f"Location received. Address: {address}"})
 
 @app.route('/send_alert', methods=['POST'])
 def send_alert():
-    # Handle alert sending logic here
-    # For now, just log that an alert has been sent
-    print("Alert sent")
-    return jsonify({'message': 'Alert sent'})
+    data = request.get_json()
+    department = data.get('department')
+    
+    # Log the alert
+    print(f"Alert sent to: {department}")
+    
+    return jsonify({'message': f"Alert sent to {department}"})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))  # Use the port from environment variable or default to 10000
