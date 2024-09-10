@@ -7,48 +7,96 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
             text-align: center;
-            background-color: #f4f4f4;
         }
-        .container {
-            max-width: 800px;
+
+        #container {
+            position: relative;
+            width: 80%;
             margin: 0 auto;
-            padding: 20px;
+            padding-top: 20px;
         }
+
+        h1 {
+            color: #ff6f00;
+        }
+
+        #background-image {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        #form-container {
+            margin-top: 20px;
+        }
+
         button {
-            background-color: orange;
+            background-color: #ff6f00;
             color: white;
             border: none;
             padding: 15px 30px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
             font-size: 16px;
-            margin: 10px 2px;
             cursor: pointer;
+            border-radius: 5px;
+            margin: 10px;
+            transition: background-color 0.3s ease;
         }
-        img {
-            max-width: 100%;
+
+        button:hover {
+            background-color: #e65c00;
+        }
+
+        #department-buttons {
+            margin-top: 20px;
+        }
+
+        #department-images {
+            margin-top: 20px;
+        }
+
+        #department-image {
+            width: 100%;
+            max-width: 400px;
             height: auto;
             display: block;
             margin: 20px auto;
         }
+
         .message {
-            color: red;
+            color: #ff0000;
             font-size: 18px;
-            font-weight: bold;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div id="container">
         <h1>Emergency Alert System</h1>
-        <img src="/images/emergency.jpg" alt="Emergency Image">
-        <button onclick="sendLocation()">Send Location</button>
-        <button onclick="sendAlert()">Send Alert</button>
-        <div id="message" class="message"></div>
+        <img id="background-image" src="/images/emergency.jpg" alt="Emergency Background">
+
+        <div id="form-container">
+            <button id="send-location-button" onclick="sendLocation()">Send Location</button>
+            <p id="message" class="message"></p>
+        </div>
+
+        <div id="department-buttons" style="display: none;">
+            <button onclick="sendAlert('ambulance')">Ambulance</button>
+            <button onclick="sendAlert('firefighter')">Firefighter</button>
+            <button onclick="sendAlert('rescue')">Rescue</button>
+            <button onclick="sendAlert('police')">Police</button>
+        </div>
+
+        <div id="department-images" style="display: none;">
+            <img id="department-image" src="" alt="Department Image">
+        </div>
     </div>
-    
+
     <script>
         function sendLocation() {
             if (navigator.geolocation) {
@@ -56,35 +104,66 @@
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
                     
+                    // Display the coordinates on the client page
+                    document.getElementById('message').innerText = `Location sent: Latitude = ${latitude}, Longitude = ${longitude}`;
+                    
+                    // Send the coordinates to the server
                     fetch('/send_location', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ latitude, longitude })
+                        body: JSON.stringify({ latitude: latitude, longitude: longitude })
                     })
                     .then(response => response.json())
                     .then(data => {
-                        document.getElementById('message').innerText = data.message;
+                        console.log(data.message);
+                        // Optionally, handle server response if needed
                     })
-                    .catch(error => console.error('Error:', error));
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('message').innerText = "Failed to send location.";
+                    });
+                    
+                    // Hide the send location button and show department buttons
+                    document.getElementById('send-location-button').style.display = 'none';
+                    document.getElementById('department-buttons').style.display = 'block';
                 }, function(error) {
-                    document.getElementById('message').innerText = 'Geolocation error: ' + error.message;
+                    document.getElementById('message').innerText = "Error getting location: " + error.message;
                 });
             } else {
-                document.getElementById('message').innerText = 'Geolocation is not supported by this browser.';
+                document.getElementById('message').innerText = "Geolocation is not supported by this browser.";
             }
         }
-        
-        function sendAlert() {
+
+        function sendAlert(department) {
             fetch('/send_alert', {
-                method: 'POST'
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ department: department })
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('message').innerText = data.message;
+                document.getElementById('message').innerText = `Alert sent to ${department.charAt(0).toUpperCase() + department.slice(1)}`;
+                document.getElementById('department-buttons').style.display = 'none';
+
+                const departmentImages = {
+                    ambulance: 'images/ambulance.jpg',
+                    firefighter: 'images/firefighter.jpg',
+                    rescue: 'images/rescuer.jpg',
+                    police: 'images/police.jpg'
+                };
+
+                const alertImage = document.getElementById('department-image');
+                alertImage.src = departmentImages[department];
+                document.getElementById('department-images').style.display = 'block';
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('message').innerText = "Failed to send alert.";
+            });
         }
     </script>
 </body>
