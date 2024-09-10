@@ -1,11 +1,17 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
+import os
 
 app = Flask(__name__)
 
-# Render the main page
+# Serve the index.html file directly from the main directory
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return send_from_directory(os.getcwd(), 'index.html')
+
+# Serve images from the "images" folder
+@app.route('/images/<path:filename>')
+def images(filename):
+    return send_from_directory(os.path.join(os.getcwd(), 'images'), filename)
 
 # Receive and print location from the client
 @app.route('/send_location', methods=['POST'])
