@@ -24,10 +24,10 @@ def send_location():
         latitude = data.get('latitude')
         longitude = data.get('longitude')
         
-        # Log location data
-        print(f"Received location: Latitude {latitude}, Longitude {longitude}")
+        # Log location data on server console
+        print(f"Client coordinates: Latitude {latitude}, Longitude {longitude}")
         
-        # Confirm receipt of location
+        # Send confirmation back to the client
         return jsonify({'message': f"Location received: Latitude {latitude}, Longitude {longitude}"})
     except Exception as e:
         print(f"Error: {e}")
