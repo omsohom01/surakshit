@@ -3,39 +3,43 @@ import os
 
 app = Flask(__name__)
 
-# Serve the index.html file directly from the main directory
+# Serve index.html directly
 @app.route('/')
 def index():
     return send_from_directory(os.getcwd(), 'index.html')
 
-# Serve images from the "images" folder
+# Serve images from the images directory
 @app.route('/images/<path:filename>')
 def images(filename):
     return send_from_directory(os.path.join(os.getcwd(), 'images'), filename)
 
-# Receive and print location from the client
+# Receive and log the location from the client
 @app.route('/send_location', methods=['POST'])
 def send_location():
-    data = request.json  # Receive JSON data from client
+    data = request.json  # Receiving JSON data from the client
     latitude = data.get('latitude')
     longitude = data.get('longitude')
     
-    # Print coordinates to the server logs
+    # Print to the server logs (Render or locally)
     print(f"Received coordinates: Latitude = {latitude}, Longitude = {longitude}")
     
-    # Send response back to client with received location
-    return jsonify({'message': 'Location received', 'latitude': latitude, 'longitude': longitude})
+    # Respond back to the client with the location data
+    return jsonify({
+        'message': 'Location received',
+        'latitude': latitude,
+        'longitude': longitude
+    })
 
-# Receive alert department data
+# Receive and log alert department data
 @app.route('/send_alert', methods=['POST'])
 def send_alert():
-    data = request.json  # Receive JSON data from client
+    data = request.json  # Receiving JSON data from the client
     department = data.get('department')
     
-    # Print department selection to server logs
+    # Print the alert info to the server logs (Render or locally)
     print(f"Alert department received: {department}")
     
-    # Send response back to client with received department
+    # Respond back to the client with the department data
     return jsonify({'message': f'Department alert received: {department}'})
 
 if __name__ == '__main__':
