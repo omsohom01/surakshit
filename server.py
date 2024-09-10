@@ -1,54 +1,36 @@
 from flask import Flask, render_template, request, jsonify
-from flask_cors import CORS
 
-app = Flask(__name__, static_folder='images', template_folder='.')
-CORS(app)
+app = Flask(__name__)
 
-# Route to serve the index.html page
+# Render the main page
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Dictionary to store department alerts
-alerts = {
-    "ambulance": "Ambulance",
-    "firefighter": "Firefighter",
-    "rescue": "Rescue",
-    "police": "Police"
-}
-
+# Receive and print location from the client
 @app.route('/send_location', methods=['POST'])
 def send_location():
-    try:
-        data = request.get_json()
-        latitude = data.get('latitude')
-        longitude = data.get('longitude')
-        
-        # Log location data on server console
-        print(f"Client coordinates: Latitude {latitude}, Longitude {longitude}")
-        
-        # Send confirmation back to the client
-        return jsonify({'message': f"Location received: Latitude {latitude}, Longitude {longitude}"})
-    except Exception as e:
-        print(f"Error: {e}")
-        return jsonify({'message': 'Error processing location'}), 500
+    data = request.json  # Receive JSON data from client
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+    
+    # Print coordinates to the server logs
+    print(f"Received coordinates: Latitude = {latitude}, Longitude = {longitude}")
+    
+    # Send response back to client with received location
+    return jsonify({'message': 'Location received', 'latitude': latitude, 'longitude': longitude})
 
+# Receive alert department data
 @app.route('/send_alert', methods=['POST'])
 def send_alert():
-    try:
-        data = request.get_json()
-        department = data.get('department')
-        
-        if department in alerts:
-            message = f"Alert sent to {alerts[department]}"
-            # Print alert message to console
-            print(message)
-            return jsonify({'message': message})
-        else:
-            return jsonify({'message': 'Invalid department'}), 400
-    except Exception as e:
-        print(f"Error: {e}")
-        return jsonify({'message': 'Error processing alert'}), 500
+    data = request.json  # Receive JSON data from client
+    department = data.get('department')
+    
+    # Print department selection to server logs
+    print(f"Alert department received: {department}")
+    
+    # Send response back to client with received department
+    return jsonify({'message': f'Department alert received: {department}'})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(debug=True, host='0.0.0.0')
