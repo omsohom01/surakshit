@@ -45,6 +45,7 @@
             cursor: pointer;
             border-radius: 5px;
             margin: 10px;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
@@ -103,6 +104,10 @@
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
                     
+                    // Display the coordinates on the client page
+                    document.getElementById('message').innerText = `Location sent: Latitude = ${latitude}, Longitude = ${longitude}`;
+                    
+                    // Send the coordinates to the server
                     fetch('/send_location', {
                         method: 'POST',
                         headers: {
@@ -112,11 +117,17 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        document.getElementById('message').innerText = data.message;
-                        document.getElementById('send-location-button').style.display = 'none';
-                        document.getElementById('department-buttons').style.display = 'block';
+                        console.log(data.message);
+                        // Optionally, handle server response if needed
                     })
-                    .catch(error => console.error('Error:', error));
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('message').innerText = "Failed to send location.";
+                    });
+                    
+                    // Hide the send location button and show department buttons
+                    document.getElementById('send-location-button').style.display = 'none';
+                    document.getElementById('department-buttons').style.display = 'block';
                 }, function(error) {
                     document.getElementById('message').innerText = "Error getting location: " + error.message;
                 });
@@ -145,11 +156,15 @@
                     police: 'images/police.jpg'
                 };
 
-                document.getElementById('department-image').src = departmentImages[department];
+                const alertImage = document.getElementById('department-image');
+                alertImage.src = departmentImages[department];
                 document.getElementById('department-images').style.display = 'block';
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('message').innerText = "Failed to send alert.";
+            });
         }
     </script>
 </body>
-</html
+</html>
