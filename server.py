@@ -4,40 +4,56 @@ import os
 
 app = Flask(__name__)
 
-# Use your OpenCage API key
-geolocator = OpenCage(api_key='0a729828da444deba41bb4888ce3f7bc')
+# OpenCage API key from your provided information
+API_KEY = "0a729828da444deba41bb4888ce3f7bc"
+geolocator = OpenCage(API_KEY)
 
-@app.route('/')
-def index():
-    return send_from_directory('', 'index.html')
+# Serve images from the 'images' folder
+@app.route('/images/<path:filename>')
+def serve_image(filename):
+    return send_from_directory('images', filename)
 
+# Endpoint to handle location data
 @app.route('/send_location', methods=['POST'])
 def send_location():
-    data = request.get_json()
-    latitude = data.get('latitude')
-    longitude = data.get('longitude')
-
     try:
-        # Perform reverse geocoding using OpenCage API
+        data = request.get_json()
+        latitude = data['latitude']
+        longitude = data['longitude']
+        
+        # Reverse geocoding using OpenCage API
         location = geolocator.reverse(f"{latitude}, {longitude}")
-        address = location[0]['formatted']  # Get formatted address
-        return jsonify({'address': address}), 200
+        
+        if location:
+            address = location[0]['formatted']
+            return jsonify({'status': 'success', 'address': address})
+        else:
+            return jsonify({'status': 'fail', 'message': 'Location not found'}), 404
     except Exception as e:
         print(e)
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'status': 'fail', 'message': 'An error occurred'}), 500
 
+# Endpoint to handle alerts
 @app.route('/send_alert', methods=['POST'])
 def send_alert():
     data = request.get_json()
-    alert_type = data.get('alert_type')
+    department = data.get('department', 'emergency')
+    
+    # Return corresponding image based on the department
+    if department == 'firefighter':
+        return jsonify({'status': 'success', 'image_url': '/images/firefighter.jpg'})
+    elif department == 'police':
+        return jsonify({'status': 'success', 'image_url': '/images/police.jpg'})
+    elif department == 'rescue':
+        return jsonify({'status': 'success', 'image_url': '/images/rescue.jpg'})
+    else:
+        return jsonify({'status': 'success', 'image_url': '/images/emergency.jpg'})
 
-    # Handle the alert and notify responders based on alert type
-    # You can add more logic here as needed
-    return jsonify({'message': f"Alert of type '{alert_type}' received"}), 200
-
-@app.route('/images/<path:filename>')
-def send_image(filename):
-    return send_from_directory('images', filename)
+# Default route
+@app.route('/')
+def index():
+    return 'Welcome to Surakshit!'
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))  # Use the environment port or default to 5000
+    app.run(host='0.0.0.0', port=port, debug=True)
