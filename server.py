@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, render_template
 from geopy.geocoders import OpenCage
 import os
 
@@ -49,10 +49,10 @@ def send_alert():
     else:
         return jsonify({'status': 'success', 'image_url': '/images/emergency.jpg'})
 
-# Default route
+# Serve the index.html file for the home page
 @app.route('/')
 def index():
-    return 'Welcome to Surakshit!'
+    return render_template('index.html')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))  # Use the environment port or default to 5000
