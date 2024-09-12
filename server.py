@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import asyncio
 from geopy.geocoders import OpenCage
 from geopy.exc import GeocoderTimedOut
+import os
 
 app = Flask(__name__)
 
@@ -9,9 +10,11 @@ app = Flask(__name__)
 API_KEY = "0a729828da444deba41bb4888ce3f7bc"
 geolocator = OpenCage(API_KEY, timeout=5)  # Set a 5-second timeout for requests
 
+# Serve the index.html directly from the root of the project
 @app.route('/')
-def index():
-    return "Welcome to Surakshit!"
+def serve_index():
+    # Serve the index.html directly from the root of the repository
+    return send_from_directory(directory=app.root_path, path='index.html')
 
 # Async function to fetch location data
 async def get_location(latitude, longitude):
@@ -37,14 +40,5 @@ async def send_location():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/send_alert', methods=['POST'])
-def send_alert():
-    try:
-        data = request.json
-        department = data['department']
-        return jsonify({"message": f"Alert sent to {department} department!"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)  # Set the port here
+    app.run(host='0.0.0.0', port=5000, debug=True)
