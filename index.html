@@ -117,17 +117,16 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data.message);
-                        // Optionally, handle server response if needed
+                        document.getElementById('message').innerText = `Location received: Latitude = ${data.latitude}, Longitude = ${data.longitude}, Address = ${data.address}`;
+                        
+                        // Hide the send location button and show department buttons
+                        document.getElementById('send-location-button').style.display = 'none';
+                        document.getElementById('department-buttons').style.display = 'block';
                     })
                     .catch(error => {
                         console.error('Error:', error);
                         document.getElementById('message').innerText = "Failed to send location.";
                     });
-                    
-                    // Hide the send location button and show department buttons
-                    document.getElementById('send-location-button').style.display = 'none';
-                    document.getElementById('department-buttons').style.display = 'block';
                 }, function(error) {
                     document.getElementById('message').innerText = "Error getting location: " + error.message;
                 });
