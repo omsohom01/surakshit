@@ -83,6 +83,7 @@
         <div id="form-container">
             <button id="send-location-button" onclick="sendLocation()">Send Location</button>
             <p id="message" class="message"></p>
+            <p id="address" class="message"></p> <!-- Display address -->
         </div>
 
         <div id="department-buttons" style="display: none;">
@@ -98,15 +99,14 @@
     </div>
 
     <script>
+        let address = ""; // Variable to store the address
+
         function sendLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position) {
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
-                    
-                    // Display the coordinates on the client page
-                    document.getElementById('message').innerText = `Location sent: Latitude = ${latitude}, Longitude = ${longitude}`;
-                    
+
                     // Send the coordinates to the server
                     fetch('/send_location', {
                         method: 'POST',
@@ -117,8 +117,11 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        document.getElementById('message').innerText = `Location received: Latitude = ${data.latitude}, Longitude = ${data.longitude}, Address = ${data.address}`;
-                        
+                        // Store the address and display it
+                        address = data.address;
+                        document.getElementById('message').innerText = `Location sent: Latitude = ${latitude}, Longitude = ${longitude}`;
+                        document.getElementById('address').innerText = `Address: ${address}`;
+
                         // Hide the send location button and show department buttons
                         document.getElementById('send-location-button').style.display = 'none';
                         document.getElementById('department-buttons').style.display = 'block';
