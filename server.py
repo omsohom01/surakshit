@@ -9,9 +9,8 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# OpenCage API key
+# OpenCage API Key
 OPENCAGE_API_KEY = '0a729828da444deba41bb4888ce3f7bc'
-OPENCAGE_URL = 'https://api.opencagedata.com/geocode/v1/json'
 
 # Route to serve the index.html file directly from the main directory
 @app.route('/')
@@ -39,6 +38,24 @@ alerts = {
     "police": "Police"
 }
 
+# Function to get address from coordinates using OpenCage API
+def get_address_from_coordinates(latitude, longitude):
+    try:
+        response = requests.get(
+            f'https://api.opencagedata.com/geocode/v1/json',
+            params={
+                'q': f'{latitude},{longitude}',
+                'key': OPENCAGE_API_KEY
+            }
+        )
+        response_data = response.json()
+        if response_data['results']:
+            return response_data['results'][0]['formatted']
+        return "Address not found"
+    except Exception as e:
+        logger.exception("Error getting address from OpenCage API")
+        return "Error retrieving address"
+
 # Route to receive and log the location from the client
 @app.route('/send_location', methods=['POST'])
 def send_location():
@@ -51,30 +68,19 @@ def send_location():
             logger.error("Latitude or Longitude not provided in the request.")
             return jsonify({'message': 'Latitude and Longitude are required.'}), 400
 
-        # Log the coordinates on the server
+        # Get the address from coordinates
+        address = get_address_from_coordinates(latitude, longitude)
+
+        # Log the coordinates and address on the server
         logger.info(f"Received coordinates: Latitude = {latitude}, Longitude = {longitude}")
+        logger.info(f"Address: {address}")
 
-        # Get the address from OpenCage API
-        response = requests.get(OPENCAGE_URL, params={
-            'q': f'{latitude},{longitude}',
-            'key': OPENCAGE_API_KEY
-        })
-
-        if response.status_code == 200:
-            results = response.json().get('results', [])
-            if results:
-                address = results[0].get('formatted', 'Address not found')
-            else:
-                address = 'Address not found'
-        else:
-            address = 'Error fetching address'
-
-        # Respond back to the client with address
+        # Respond back to the client
         return jsonify({
             'message': f"Location received: Latitude = {latitude}, Longitude = {longitude}",
+            'address': address,
             'latitude': latitude,
-            'longitude': longitude,
-            'address': address
+            'longitude': longitude
         })
     except Exception as e:
         logger.exception("Error processing /send_location")
