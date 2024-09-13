@@ -88,5 +88,7 @@ def send_alert():
     # Implement your alert system logic here
     return jsonify({"message": "Alert sent successfully!"}), 200
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    # Bind to the port provided by Render
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
