@@ -91,6 +91,7 @@
             flex-wrap: wrap;
             gap: 10px; /* Space between images */
             margin-top: 20px;
+            display: none; /* Initially hidden */
         }
 
         #department-images img {
@@ -103,6 +104,18 @@
 
         #extra-info {
             display: none;
+            text-align: left;
+            margin: 0 auto;
+            width: 80%;
+            box-sizing: border-box;
+        }
+
+        #extra-info input, #extra-info textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
 
         #send-alert-button {
@@ -117,7 +130,6 @@
             transition: background-color 0.3s ease;
             display: none; /* Initially hidden */
             margin-top: 20px;
-            /* Centering the button */
             display: block;
             margin-left: auto;
             margin-right: auto;
@@ -158,14 +170,14 @@
             <button id="send-alert-button" onclick="sendAlert()">Send Alert</button>
         </div>
 
-        <div id="extra-info" style="display: none;">
+        <div id="extra-info">
             <input type="text" id="user-name" placeholder="Your Name">
             <textarea id="problem-details" placeholder="Describe the problem..."></textarea>
             <button onclick="sendDetails()">Submit Details</button>
         </div>
 
-        <div id="department-images" style="display: none;">
-            <img id="department-image" src="" alt="Department Image">
+        <div id="department-images">
+            <!-- Department images will be added here dynamically -->
         </div>
     </div>
 
@@ -264,9 +276,10 @@
                     departmentImagesContainer.appendChild(img);
                 });
 
+                // Show extra info section
                 document.getElementById('extra-info').style.display = 'block';
+                // Hide department buttons
                 document.getElementById('department-buttons').style.display = 'none';
-                document.getElementById('send-alert-button').style.display = 'none';
             })
             .catch(error => {
                 console.error('Error:', error);
