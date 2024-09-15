@@ -52,12 +52,8 @@
             background-color: #e65c00;
         }
 
-        #department-buttons, #extra-info, #department-images {
-            margin-top: 20px;
-        }
-
         #department-buttons {
-            display: none;
+            margin-top: 20px;
         }
 
         #department-list {
@@ -146,7 +142,7 @@
             <p id="address" class="message"></p> <!-- Display address -->
         </div>
 
-        <div id="department-buttons">
+        <div id="department-buttons" style="display: none;">
             <button id="choose-departments-button" onclick="toggleDepartmentList()">Choose Departments</button>
             <div id="department-list">
                 <div class="checkbox-container">
