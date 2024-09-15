@@ -52,7 +52,7 @@
             background-color: #e65c00;
         }
 
-        #department-buttons {
+        #department-buttons, #extra-info {
             margin-top: 20px;
         }
 
@@ -73,6 +73,15 @@
             font-size: 18px;
             margin-top: 20px;
         }
+
+        input, textarea {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -91,6 +100,12 @@
             <button onclick="sendAlert('firefighter')">Firefighter</button>
             <button onclick="sendAlert('rescue')">Rescue</button>
             <button onclick="sendAlert('police')">Police</button>
+        </div>
+
+        <div id="extra-info" style="display: none;">
+            <input type="text" id="user-name" placeholder="Your Name">
+            <textarea id="problem-details" placeholder="Describe the problem..."></textarea>
+            <button onclick="sendDetails()">Submit Details</button>
         </div>
 
         <div id="department-images" style="display: none;">
@@ -161,10 +176,44 @@
                 const alertImage = document.getElementById('department-image');
                 alertImage.src = departmentImages[department];
                 document.getElementById('department-images').style.display = 'block';
+
+                // Show the extra information section
+                document.getElementById('extra-info').style.display = 'block';
             })
             .catch(error => {
                 console.error('Error:', error);
                 document.getElementById('message').innerText = "Failed to send alert.";
+            });
+        }
+
+        function sendDetails() {
+            const userName = document.getElementById('user-name').value;
+            const problemDetails = document.getElementById('problem-details').value;
+
+            if (!userName || !problemDetails) {
+                alert("Please fill out both fields.");
+                return;
+            }
+
+            fetch('/send_details', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: userName,
+                    details: problemDetails,
+                    address: address
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('message').innerText = "Details submitted successfully.";
+                document.getElementById('extra-info').style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('message').innerText = "Failed to submit details.";
             });
         }
     </script>
