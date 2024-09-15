@@ -134,6 +134,12 @@
             margin-left: auto;
             margin-right: auto;
         }
+
+        .message {
+            color: red; /* Set the color of received messages to red */
+            font-size: 18px; /* Adjust font size as needed */
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -261,19 +267,18 @@
                 const departmentImages = {
                     ambulance: 'images/ambulance.jpg',
                     firefighter: 'images/firefighter.jpg',
-                    rescue: 'images/rescuer.jpg',
+                    rescue: 'images/rescue.jpg',
                     police: 'images/police.jpg'
                 };
 
-                const departmentImagesContainer = document.getElementById('department-images');
-                departmentImagesContainer.innerHTML = ''; // Clear existing images
-                departmentImagesContainer.style.display = 'flex'; // Show the images horizontally
+                const ImagesContainer = document.getElementById('department-images');
+                ImagesContainer.innerHTML = ''; // Clear existing images
 
                 selectedDepartments.forEach(department => {
                     const img = document.createElement('img');
                     img.src = departmentImages[department];
-                    img.alt = `${department} Image`;
-                    departmentImagesContainer.appendChild(img);
+                    img.alt = department;
+                    ImagesContainer.appendChild(img);
                 });
 
                 // Show extra info section
