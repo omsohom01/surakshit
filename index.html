@@ -5,38 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emergency Alert System</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
+        /* Existing CSS styles */
 
-        #container {
+        #department-container {
             position: relative;
-            width: 80%;
-            margin: 0 auto;
-            padding-top: 20px;
-        }
-
-        h1 {
-            color: #ff6f00;
-        }
-
-        #background-image {
-            width: 100%;
-            max-width: 600px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-
-        #form-container {
             margin-top: 20px;
+            display: none; /* Initially hidden */
         }
 
-        button {
+        #choose-department-button {
             background-color: #ff6f00;
             color: white;
             border: none;
@@ -44,77 +21,45 @@
             font-size: 16px;
             cursor: pointer;
             border-radius: 5px;
-            margin: 10px;
             transition: background-color 0.3s ease;
         }
 
-        button:hover {
+        #choose-department-button:hover {
             background-color: #e65c00;
         }
 
-        #department-container {
+        .department-list {
             display: none;
-            position: relative;
-            margin-top: 20px;
+            background-color: #ff6f00;
+            border-radius: 5px;
             overflow: hidden;
+            transition: max-height 0.5s ease-out;
+            max-height: 0; /* Initially hidden */
+            padding: 0;
         }
 
-        #department-button {
-            background-color: #ff6f00;
+        .department-list.show {
+            display: block;
+            max-height: 300px; /* Adjust based on content */
+        }
+
+        .department-list button {
+            background-color: transparent;
             color: white;
             border: none;
-            padding: 15px;
+            padding: 10px;
+            width: 100%;
+            text-align: left;
             cursor: pointer;
-            border-radius: 5px;
-            margin: 10px;
         }
 
-        #department-list {
-            display: flex;
-            flex-direction: column;
-            background-color: #ff6f00;
-            border-radius: 5px;
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 10px;
-            position: absolute;
-            top: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            transition: max-height 0.5s ease-in-out;
-            overflow: hidden;
-            max-height: 0;
+        .department-list button:hover {
+            background-color: #e65c00;
         }
 
-        #department-list input[type="checkbox"] {
-            margin-right: 10px;
-        }
-
-        #department-images {
-            margin-top: 20px;
-        }
-
-        #department-image {
-            width: 100%;
-            max-width: 400px;
-            height: auto;
-            display: block;
-            margin: 20px auto;
-        }
-
-        .message {
-            color: #ff0000;
-            font-size: 18px;
-            margin-top: 20px;
-        }
-
-        input, textarea {
-            width: 100%;
-            max-width: 400px;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+        /* Additional styles for the sliding effect */
+        .department-list button {
+            border-bottom: 1px solid #fff;
         }
     </style>
 </head>
@@ -125,17 +70,20 @@
 
         <div id="form-container">
             <button id="send-location-button" onclick="sendLocation()">Send Location</button>
-            <button id="choose-department-button" style="display: none;" onclick="toggleDepartmentList()">Choose Departments</button>
             <p id="message" class="message"></p>
             <p id="address" class="message"></p> <!-- Display address -->
+
+            <!-- New Choose Departments Button -->
+            <button id="choose-department-button" style="display: none;" onclick="toggleDepartments()">Choose Departments</button>
         </div>
 
+        <!-- Department Container -->
         <div id="department-container">
-            <div id="department-list">
-                <label><input type="checkbox" value="ambulance"> Ambulance</label>
-                <label><input type="checkbox" value="firefighter"> Firefighter</label>
-                <label><input type="checkbox" value="rescue"> Rescue</label>
-                <label><input type="checkbox" value="police"> Police</label>
+            <div id="department-buttons" class="department-list">
+                <button onclick="sendAlert('ambulance')">Ambulance</button>
+                <button onclick="sendAlert('firefighter')">Firefighter</button>
+                <button onclick="sendAlert('rescue')">Rescue</button>
+                <button onclick="sendAlert('police')">Police</button>
             </div>
         </div>
 
@@ -190,33 +138,24 @@
             }
         }
 
-        function toggleDepartmentList() {
-            const departmentList = document.getElementById('department-list');
-            const maxHeight = departmentList.style.maxHeight === '0px' ? '300px' : '0px';
-            departmentList.style.maxHeight = maxHeight;
+        function toggleDepartments() {
+            const departmentList = document.getElementById('department-buttons');
+            departmentList.classList.toggle('show');
         }
 
-        function sendAlert() {
-            const selectedDepartments = Array.from(document.querySelectorAll('#department-list input[type="checkbox"]:checked'))
-                                            .map(checkbox => checkbox.value);
-            if (selectedDepartments.length === 0) {
-                document.getElementById('message').innerText = "No departments selected.";
-                return;
-            }
-
+        function sendAlert(department) {
             fetch('/send_alert', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ departments: selectedDepartments })
+                body: JSON.stringify({ department: department })
             })
             .then(response => response.json())
             .then(data => {
-                const departments = selectedDepartments.join(', ');
-                document.getElementById('message').innerText = `Alert sent to ${departments}`;
+                document.getElementById('message').innerText = `Alert sent to ${department.charAt(0).toUpperCase() + department.slice(1)}`;
                 document.getElementById('choose-department-button').style.display = 'none';
-                document.getElementById('department-list').style.display = 'none';
+                document.getElementById('department-container').style.display = 'none';
 
                 const departmentImages = {
                     ambulance: 'images/ambulance.jpg',
@@ -225,10 +164,9 @@
                     police: 'images/police.jpg'
                 };
 
-                const alertImages = selectedDepartments.map(department => departmentImages[department]);
-                const departmentImagesContainer = document.getElementById('department-images');
-                departmentImagesContainer.innerHTML = alertImages.map(src => `<img id="department-image" src="${src}" alt="Department Image">`).join('');
-                departmentImagesContainer.style.display = 'block';
+                const alertImage = document.getElementById('department-image');
+                alertImage.src = departmentImages[department];
+                document.getElementById('department-images').style.display = 'block';
 
                 // Show the extra information section
                 document.getElementById('extra-info').style.display = 'block';
