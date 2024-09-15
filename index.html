@@ -86,30 +86,21 @@
         }
 
         #department-images {
-            display: none;
-        }
-
-        #department-image {
-            width: 100%;
-            max-width: 400px;
-            height: auto;
-            display: block;
-            margin: 20px auto;
-        }
-
-        .message {
-            color: #ff0000;
-            font-size: 18px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px; /* Space between images */
             margin-top: 20px;
         }
 
-        input, textarea {
-            width: 100%;
-            max-width: 400px;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
+        #department-images img {
+            width: 200px; /* Adjust width as needed */
+            height: auto;
             border-radius: 5px;
+        }
+
+        #extra-info {
+            display: none;
         }
 
         #send-alert-button {
@@ -260,16 +251,17 @@
                     police: 'images/police.jpg'
                 };
 
-                const alertImage = document.getElementById('department-image');
-                document.getElementById('department-images').innerHTML = '';
+                const departmentImagesContainer = document.getElementById('department-images');
+                departmentImagesContainer.innerHTML = ''; // Clear existing images
+
                 selectedDepartments.forEach(department => {
                     const img = document.createElement('img');
                     img.src = departmentImages[department];
                     img.alt = `${department} Image`;
-                    img.id = 'department-image';
-                    document.getElementById('department-images').appendChild(img);
+                    departmentImagesContainer.appendChild(img);
                 });
-                document.getElementById('department-images').style.display = 'block';
+
+                departmentImagesContainer.style.display = 'flex'; // Show the images horizontally
                 document.getElementById('extra-info').style.display = 'block';
                 document.getElementById('department-buttons').style.display = 'none';
             })
