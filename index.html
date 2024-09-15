@@ -52,25 +52,8 @@
             background-color: #e65c00;
         }
 
-        #dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        #department-list {
-            display: none;
-            position: absolute;
-            background-color: #f9f9f9;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-            margin-top: 10px;
-            padding: 10px;
-            text-align: left;
-        }
-
-        #department-list label {
-            display: block;
-            margin: 5px 0;
+        #department-buttons, #extra-info {
+            margin-top: 20px;
         }
 
         #department-images {
@@ -91,8 +74,13 @@
             margin-top: 20px;
         }
 
-        .checkbox {
-            margin-right: 10px;
+        input, textarea {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -104,18 +92,20 @@
         <div id="form-container">
             <button id="send-location-button" onclick="sendLocation()">Send Location</button>
             <p id="message" class="message"></p>
-            <p id="address" class="message"></p>
+            <p id="address" class="message"></p> <!-- Display address -->
         </div>
 
-        <div id="dropdown">
-            <button onclick="toggleDropdown()">Choose Departments</button>
-            <div id="department-list">
-                <label><input type="checkbox" class="checkbox" value="ambulance"> Ambulance</label>
-                <label><input type="checkbox" class="checkbox" value="firefighter"> Firefighter</label>
-                <label><input type="checkbox" class="checkbox" value="rescue"> Rescue</label>
-                <label><input type="checkbox" class="checkbox" value="police"> Police</label>
-                <button onclick="sendAlert()">Send Alert</button>
-            </div>
+        <div id="department-buttons" style="display: none;">
+            <button onclick="sendAlert('ambulance')">Ambulance</button>
+            <button onclick="sendAlert('firefighter')">Firefighter</button>
+            <button onclick="sendAlert('rescue')">Rescue</button>
+            <button onclick="sendAlert('police')">Police</button>
+        </div>
+
+        <div id="extra-info" style="display: none;">
+            <input type="text" id="user-name" placeholder="Your Name">
+            <textarea id="problem-details" placeholder="Describe the problem..."></textarea>
+            <button onclick="sendDetails()">Submit Details</button>
         </div>
 
         <div id="department-images" style="display: none;">
@@ -124,12 +114,7 @@
     </div>
 
     <script>
-        let address = "";
-
-        function toggleDropdown() {
-            const list = document.getElementById('department-list');
-            list.style.display = list.style.display === 'none' || list.style.display === '' ? 'block' : 'none';
-        }
+        let address = ""; // Variable to store the address
 
         function sendLocation() {
             if (navigator.geolocation) {
@@ -137,6 +122,7 @@
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
 
+                    // Send the coordinates to the server
                     fetch('/send_location', {
                         method: 'POST',
                         headers: {
@@ -146,12 +132,17 @@
                     })
                     .then(response => response.json())
                     .then(data => {
+                        // Store the address and display it
                         address = data.address;
                         document.getElementById('message').innerText = `Location sent: Latitude = ${latitude}, Longitude = ${longitude}`;
                         document.getElementById('address').innerText = `Address: ${address}`;
+
+                        // Hide the send location button and show department buttons
                         document.getElementById('send-location-button').style.display = 'none';
+                        document.getElementById('department-buttons').style.display = 'block';
                     })
                     .catch(error => {
+                        console.error('Error:', error);
                         document.getElementById('message').innerText = "Failed to send location.";
                     });
                 }, function(error) {
@@ -162,48 +153,47 @@
             }
         }
 
-        function sendAlert() {
-            const checkboxes = document.querySelectorAll('.checkbox');
-            let selectedDepartments = [];
-            checkboxes.forEach(checkbox => {
-                if (checkbox.checked) {
-                    selectedDepartments.push(checkbox.value);
-                }
-            });
-
-            if (selectedDepartments.length === 0) {
-                document.getElementById('message').innerText = "Please select at least one department.";
-                return;
-            }
-
+        function sendAlert(department) {
             fetch('/send_alert', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ departments: selectedDepartments })
+                body: JSON.stringify({ department: department })
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('message').innerText = `Alert sent to: ${selectedDepartments.join(', ')}`;
-                document.getElementById('department-list').style.display = 'none';
+                document.getElementById('message').innerText = data.status;
 
-                const departmentImages = {
-                    ambulance: 'images/ambulance.jpg',
-                    firefighter: 'images/firefighter.jpg',
-                    rescue: 'images/rescuer.jpg',
-                    police: 'images/police.jpg'
-                };
-
-                let imagesHtml = '';
-                selectedDepartments.forEach(department => {
-                    imagesHtml += `<img src="${departmentImages[department]}" alt="${department} Image" class="department-image">`;
-                });
-                document.getElementById('department-images').innerHTML = imagesHtml;
+                // Show the extra info form and department image based on the alert sent
+                document.getElementById('extra-info').style.display = 'block';
                 document.getElementById('department-images').style.display = 'block';
+                document.getElementById('department-image').src = `images/${department}.jpg`;
             })
             .catch(error => {
+                console.error('Error:', error);
                 document.getElementById('message').innerText = "Failed to send alert.";
+            });
+        }
+
+        function sendDetails() {
+            const name = document.getElementById('user-name').value;
+            const details = document.getElementById('problem-details').value;
+
+            fetch('/send_details', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: name, details: details, address: address })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('message').innerText = data.status;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('message').innerText = "Failed to submit details.";
             });
         }
     </script>
