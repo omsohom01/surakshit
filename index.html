@@ -52,8 +52,23 @@
             background-color: #e65c00;
         }
 
-        #extra-info {
+        #department-buttons, #extra-info {
             margin-top: 20px;
+        }
+
+        #department-list {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.5s ease-out;
+        }
+
+        #department-list.show {
+            max-height: 500px; /* Adjust based on content */
+        }
+
+        #department-list label {
+            display: block;
+            margin: 10px 0;
         }
 
         #department-images {
@@ -83,11 +98,7 @@
             border-radius: 5px;
         }
 
-        #department-container {
-            position: relative;
-        }
-
-        #choose-department-button {
+        #send-alert-button {
             background-color: #ff6f00;
             color: white;
             border: none;
@@ -95,40 +106,7 @@
             font-size: 16px;
             cursor: pointer;
             border-radius: 5px;
-            transition: background-color 0.3s ease;
-            margin-top: 20px;
-        }
-
-        #choose-department-button:hover {
-            background-color: #e65c00;
-        }
-
-        #department-list {
-            background-color: #ff6f00;
-            border-radius: 5px;
-            overflow: hidden;
-            max-height: 0; /* Initially hidden */
-            transition: max-height 0.5s ease-out;
-            margin-top: 10px;
-        }
-
-        #department-list.show {
-            max-height: 300px; /* Adjust as needed */
-        }
-
-        #department-list button {
-            background-color: transparent;
-            color: white;
-            border: none;
-            padding: 10px;
-            width: 100%;
-            text-align: left;
-            cursor: pointer;
-            border-bottom: 1px solid #fff;
-        }
-
-        #department-list button:hover {
-            background-color: #e65c00;
+            margin: 20px 0;
         }
     </style>
 </head>
@@ -141,19 +119,17 @@
             <button id="send-location-button" onclick="sendLocation()">Send Location</button>
             <p id="message" class="message"></p>
             <p id="address" class="message"></p> <!-- Display address -->
-
-            <!-- New Choose Departments Button -->
-            <button id="choose-department-button" style="display: none;" onclick="toggleDepartments()">Choose Departments</button>
         </div>
 
-        <!-- Department Container -->
-        <div id="department-container">
-            <div id="department-list">
-                <button onclick="sendAlert('ambulance')">Ambulance</button>
-                <button onclick="sendAlert('firefighter')">Firefighter</button>
-                <button onclick="sendAlert('rescue')">Rescue</button>
-                <button onclick="sendAlert('police')">Police</button>
+        <div id="department-buttons" style="display: none;">
+            <button id="choose-departments-button" onclick="toggleDepartmentList()">Choose Departments</button>
+            <div id="department-list" class="department-list">
+                <label><input type="checkbox" name="department" value="ambulance"> Ambulance</label>
+                <label><input type="checkbox" name="department" value="firefighter"> Firefighter</label>
+                <label><input type="checkbox" name="department" value="rescue"> Rescue</label>
+                <label><input type="checkbox" name="department" value="police"> Police</label>
             </div>
+            <button id="send-alert-button" onclick="sendAlert()" style="display: none;">Send Alert</button>
         </div>
 
         <div id="extra-info" style="display: none;">
@@ -191,9 +167,9 @@
                         document.getElementById('message').innerText = `Location sent: Latitude = ${latitude}, Longitude = ${longitude}`;
                         document.getElementById('address').innerText = `Address: ${address}`;
 
-                        // Hide the send location button and show the choose departments button
+                        // Hide the send location button and show department buttons
                         document.getElementById('send-location-button').style.display = 'none';
-                        document.getElementById('choose-department-button').style.display = 'block';
+                        document.getElementById('department-buttons').style.display = 'block';
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -207,24 +183,31 @@
             }
         }
 
-        function toggleDepartments() {
+        function toggleDepartmentList() {
             const departmentList = document.getElementById('department-list');
             departmentList.classList.toggle('show');
+            document.getElementById('send-alert-button').style.display = 'block';
         }
 
-        function sendAlert(department) {
+        function sendAlert() {
+            const selectedDepartments = Array.from(document.querySelectorAll('input[name="department"]:checked')).map(cb => cb.value);
+
+            if (selectedDepartments.length === 0) {
+                alert("Please select at least one department.");
+                return;
+            }
+
             fetch('/send_alert', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ department: department })
+                body: JSON.stringify({ departments: selectedDepartments })
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('message').innerText = `Alert sent to ${department.charAt(0).toUpperCase() + department.slice(1)}`;
-                document.getElementById('choose-department-button').style.display = 'none';
-                document.getElementById('department-list').style.display = 'none';
+                document.getElementById('message').innerText = `Alert sent to: ${selectedDepartments.join(', ')}`;
+                document.getElementById('department-buttons').style.display = 'none';
 
                 const departmentImages = {
                     ambulance: 'images/ambulance.jpg',
@@ -233,9 +216,18 @@
                     police: 'images/police.jpg'
                 };
 
-                const alertImage = document.getElementById('department-image');
-                alertImage.src = departmentImages[department];
-                document.getElementById('department-images').style.display = 'block';
+                const alertImageContainer = document.getElementById('department-images');
+                alertImageContainer.innerHTML = '';
+
+                selectedDepartments.forEach(department => {
+                    const img = document.createElement('img');
+                    img.src = departmentImages[department];
+                    img.id = 'department-image';
+                    img.alt = `${department.charAt(0).toUpperCase() + department.slice(1)} Image`;
+                    alertImageContainer.appendChild(img);
+                });
+
+                alertImageContainer.style.display = 'block';
 
                 // Show the extra information section
                 document.getElementById('extra-info').style.display = 'block';
