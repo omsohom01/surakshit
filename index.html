@@ -5,11 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emergency Alert System</title>
     <style>
-        /* Existing CSS styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        #container {
+            position: relative;
+            width: 80%;
+            margin: 0 auto;
+            padding-top: 20px;
+        }
+
+        h1 {
+            color: #ff6f00;
+        }
+
+        #background-image {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        #form-container {
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: #ff6f00;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #e65c00;
+        }
+
+        #department-buttons, #extra-info {
+            margin-top: 20px;
+        }
+
+        #department-buttons {
+            display: none; /* Hide initially */
+            margin-top: 20px;
+        }
+
+        #department-images {
+            margin-top: 20px;
+        }
+
+        #department-image {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+        }
+
+        .message {
+            color: #ff0000;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        input, textarea {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
 
         #department-container {
             position: relative;
-            margin-top: 20px;
             display: none; /* Initially hidden */
         }
 
@@ -22,28 +102,28 @@
             cursor: pointer;
             border-radius: 5px;
             transition: background-color 0.3s ease;
+            margin-top: 20px;
         }
 
         #choose-department-button:hover {
             background-color: #e65c00;
         }
 
-        .department-list {
+        #department-list {
             display: none;
             background-color: #ff6f00;
             border-radius: 5px;
             overflow: hidden;
-            transition: max-height 0.5s ease-out;
             max-height: 0; /* Initially hidden */
-            padding: 0;
+            transition: max-height 0.5s ease-out;
         }
 
-        .department-list.show {
+        #department-list.show {
             display: block;
-            max-height: 300px; /* Adjust based on content */
+            max-height: 200px; /* Adjust as needed */
         }
 
-        .department-list button {
+        #department-list button {
             background-color: transparent;
             color: white;
             border: none;
@@ -51,15 +131,11 @@
             width: 100%;
             text-align: left;
             cursor: pointer;
-        }
-
-        .department-list button:hover {
-            background-color: #e65c00;
-        }
-
-        /* Additional styles for the sliding effect */
-        .department-list button {
             border-bottom: 1px solid #fff;
+        }
+
+        #department-list button:hover {
+            background-color: #e65c00;
         }
     </style>
 </head>
@@ -79,7 +155,7 @@
 
         <!-- Department Container -->
         <div id="department-container">
-            <div id="department-buttons" class="department-list">
+            <div id="department-list">
                 <button onclick="sendAlert('ambulance')">Ambulance</button>
                 <button onclick="sendAlert('firefighter')">Firefighter</button>
                 <button onclick="sendAlert('rescue')">Rescue</button>
@@ -139,7 +215,7 @@
         }
 
         function toggleDepartments() {
-            const departmentList = document.getElementById('department-buttons');
+            const departmentList = document.getElementById('department-list');
             departmentList.classList.toggle('show');
         }
 
@@ -155,7 +231,7 @@
             .then(data => {
                 document.getElementById('message').innerText = `Alert sent to ${department.charAt(0).toUpperCase() + department.slice(1)}`;
                 document.getElementById('choose-department-button').style.display = 'none';
-                document.getElementById('department-container').style.display = 'none';
+                document.getElementById('department-list').style.display = 'none';
 
                 const departmentImages = {
                     ambulance: 'images/ambulance.jpg',
