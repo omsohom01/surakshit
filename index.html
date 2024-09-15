@@ -94,9 +94,11 @@
         }
 
         #department-images img {
-            width: 200px; /* Adjust width as needed */
+            width: 300px; /* Adjust width as needed */
             height: auto;
             border-radius: 5px;
+            display: block;
+            margin: 0 auto;
         }
 
         #extra-info {
@@ -162,7 +164,7 @@
             <button onclick="sendDetails()">Submit Details</button>
         </div>
 
-        <div id="department-images">
+        <div id="department-images" style="display: none;">
             <img id="department-image" src="" alt="Department Image">
         </div>
     </div>
@@ -253,6 +255,7 @@
 
                 const departmentImagesContainer = document.getElementById('department-images');
                 departmentImagesContainer.innerHTML = ''; // Clear existing images
+                departmentImagesContainer.style.display = 'flex'; // Show the images horizontally
 
                 selectedDepartments.forEach(department => {
                     const img = document.createElement('img');
@@ -261,9 +264,9 @@
                     departmentImagesContainer.appendChild(img);
                 });
 
-                departmentImagesContainer.style.display = 'flex'; // Show the images horizontally
                 document.getElementById('extra-info').style.display = 'block';
                 document.getElementById('department-buttons').style.display = 'none';
+                document.getElementById('send-alert-button').style.display = 'none';
             })
             .catch(error => {
                 console.error('Error:', error);
