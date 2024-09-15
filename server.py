@@ -1,7 +1,7 @@
-from flask import Flask, request, jsonify, send_from_directory
-import os
 import logging
 import requests
+from flask import Flask, request, jsonify, send_from_directory
+import os
 
 app = Flask(__name__)
 
@@ -78,13 +78,17 @@ def send_location():
 def send_alert():
     try:
         data = request.json
-        department = data['department']
-        if department in alerts:
-            logger.info(f"Alert sent to {alerts[department]}")
-            return jsonify({"status": f"Alert sent to {alerts[department]}"})
+        departments = data['departments']
+        if not departments:
+            return jsonify({"status": "No departments specified"}), 400
+
+        department_names = [alerts[dept] for dept in departments if dept in alerts]
+        if department_names:
+            logger.info(f"Alert sent to {', '.join(department_names)}")
+            return jsonify({"status": f"Alert sent to {', '.join(department_names)}"})
         else:
-            logger.warning("Invalid department specified")
-            return jsonify({"status": "Invalid department"}), 400
+            logger.warning("Invalid departments specified")
+            return jsonify({"status": "Invalid departments"}), 400
     except Exception as e:
         logger.exception("Error processing alert")
         return jsonify({"status": "Failed to send alert"}), 500
