@@ -3,13 +3,13 @@ import os
 import logging
 import requests
 
-app = Flask(__name__)  # Corrected _name_ to __name__
+app = Flask(__name__)
 
 # Configure logging to display INFO level messages
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# OpenCage API Key (Replace with your actual key)
+# OpenCage API Key
 OPENCAGE_API_KEY = '0a729828da444deba41bb4888ce3f7bc'
 
 # Route to serve the index.html file directly from the main directory
@@ -78,27 +78,13 @@ def send_location():
 def send_alert():
     try:
         data = request.json
-        departments = data.get('departments', [])
-
-        # Ensure at least one department is selected
-        if not departments:
-            return jsonify({"status": "No department selected"}), 400
-
-        # Validate departments
-        invalid_departments = [dep for dep in departments if dep not in alerts]
-        if invalid_departments:
-            logger.warning(f"Invalid departments: {', '.join(invalid_departments)}")
-            return jsonify({"status": "Invalid department(s) selected"}), 400
-
-        # Handle alert for selected departments
-        alert_messages = [f"Alert sent to {alerts[dep]}" for dep in departments]
-        logger.info(f"Alerts sent to: {', '.join(departments)}")
-
-        return jsonify({
-            "status": "Success",
-            "message": f"Alerts sent to: {', '.join(departments)}",
-            "departments": departments
-        })
+        department = data['department']
+        if department in alerts:
+            logger.info(f"Alert sent to {alerts[department]}")
+            return jsonify({"status": f"Alert sent to {alerts[department]}"})
+        else:
+            logger.warning("Invalid department specified")
+            return jsonify({"status": "Invalid department"}), 400
     except Exception as e:
         logger.exception("Error processing alert")
         return jsonify({"status": "Failed to send alert"}), 500
