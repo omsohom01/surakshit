@@ -150,19 +150,19 @@
             <button id="choose-departments-button" onclick="toggleDepartmentList()">Choose Departments</button>
             <div id="department-list">
                 <div class="checkbox-container">
-                    <input type="checkbox" id="ambulance" value="ambulance">
+                    <input type="checkbox" id="ambulance" value="ambulance" onchange="updateSendAlertButtonVisibility()">
                     <label for="ambulance">Ambulance</label>
                 </div>
                 <div class="checkbox-container">
-                    <input type="checkbox" id="firefighter" value="firefighter">
+                    <input type="checkbox" id="firefighter" value="firefighter" onchange="updateSendAlertButtonVisibility()">
                     <label for="firefighter">Firefighter</label>
                 </div>
                 <div class="checkbox-container">
-                    <input type="checkbox" id="rescue" value="rescue">
+                    <input type="checkbox" id="rescue" value="rescue" onchange="updateSendAlertButtonVisibility()">
                     <label for="rescue">Rescue</label>
                 </div>
                 <div class="checkbox-container">
-                    <input type="checkbox" id="police" value="police">
+                    <input type="checkbox" id="police" value="police" onchange="updateSendAlertButtonVisibility()">
                     <label for="police">Police</label>
                 </div>
             </div>
@@ -223,9 +223,18 @@
         function toggleDepartmentList() {
             const departmentList = document.getElementById('department-list');
             departmentList.classList.toggle('show');
-            
-            // Show the send alert button after departments are selected
-            document.getElementById('send-alert-button').style.display = 'block';
+        }
+
+        function updateSendAlertButtonVisibility() {
+            const checkboxes = document.querySelectorAll('#department-list input[type=checkbox]');
+            const sendAlertButton = document.getElementById('send-alert-button');
+            const anyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+
+            if (anyChecked) {
+                sendAlertButton.style.display = 'block'; // Show the button if any department is selected
+            } else {
+                sendAlertButton.style.display = 'none'; // Hide the button if no departments are selected
+            }
         }
 
         function sendAlert() {
@@ -269,7 +278,6 @@
 
                 // Hide department buttons and send alert button
                 document.getElementById('department-buttons').style.display = 'none';
-                document.getElementById('send-alert-button').style.display = 'none';
 
                 // Show the extra information section
                 document.getElementById('extra-info').style.display = 'block';
