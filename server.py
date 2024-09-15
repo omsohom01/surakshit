@@ -60,52 +60,49 @@ def get_address_from_coordinates(latitude, longitude):
 @app.route('/send_location', methods=['POST'])
 def send_location():
     try:
-        data = request.get_json()
-        latitude = data.get('latitude')
-        longitude = data.get('longitude')
+        data = request.json
+        latitude = data['latitude']
+        longitude = data['longitude']
 
-        if latitude is None or longitude is None:
-            logger.error("Latitude or Longitude not provided in the request.")
-            return jsonify({'message': 'Latitude and Longitude are required.'}), 400
-
-        # Get the address from coordinates
+        # Get address from OpenCage API
         address = get_address_from_coordinates(latitude, longitude)
 
-        # Log the coordinates and address on the server
-        logger.info(f"Received coordinates: Latitude = {latitude}, Longitude = {longitude}")
-        logger.info(f"Address: {address}")
-
-        # Respond back to the client
-        return jsonify({
-            'message': f"Location received: Latitude = {latitude}, Longitude = {longitude}",
-            'address': address,
-            'latitude': latitude,
-            'longitude': longitude
-        })
+        logger.info(f"Location received: Latitude = {latitude}, Longitude = {longitude}, Address = {address}")
+        return jsonify({"status": "Location received", "address": address})
     except Exception as e:
-        logger.exception("Error processing /send_location")
-        return jsonify({'message': 'Error processing location'}), 500
+        logger.exception("Error processing location data")
+        return jsonify({"status": "Failed to receive location"}), 500
 
-# Route to receive and log alert department data
+# Route to receive and log the department alert
 @app.route('/send_alert', methods=['POST'])
 def send_alert():
     try:
-        data = request.get_json()
-        department = data.get('department')
-
-        if department not in alerts:
-            logger.error(f"Invalid department: {department}")
-            return jsonify({'message': 'Invalid department'}), 400
-
-        # Log the alert department on the server
-        logger.info(f"Alert department received: {department}")
-
-        # Respond back to the client
-        return jsonify({'message': f'Alert sent to {alerts[department]}'})
+        data = request.json
+        department = data['department']
+        if department in alerts:
+            logger.info(f"Alert sent to {alerts[department]}")
+            return jsonify({"status": f"Alert sent to {alerts[department]}"})
+        else:
+            logger.warning("Invalid department specified")
+            return jsonify({"status": "Invalid department"}), 400
     except Exception as e:
-        logger.exception("Error processing /send_alert")
-        return jsonify({'message': 'Error processing alert'}), 500
+        logger.exception("Error processing alert")
+        return jsonify({"status": "Failed to send alert"}), 500
+
+# Route to receive and log user details and problem description
+@app.route('/send_details', methods=['POST'])
+def send_details():
+    try:
+        data = request.json
+        name = data['name']
+        details = data['details']
+        address = data['address']
+
+        logger.info(f"Details received: Name = {name}, Address = {address}, Problem Details = {details}")
+        return jsonify({"status": "Details received"})
+    except Exception as e:
+        logger.exception("Error processing user details")
+        return jsonify({"status": "Failed to receive details"}), 500
 
 if __name__ == '__main__':
-    # Run the app on host 0.0.0.0 to make it accessible externally, and set port 5000
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0')
