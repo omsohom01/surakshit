@@ -56,19 +56,36 @@
             margin-top: 20px;
         }
 
+        #department-buttons {
+            display: none;
+        }
+
         #department-list {
-            overflow: hidden;
             max-height: 0;
+            overflow: hidden;
             transition: max-height 0.5s ease-out;
+            background-color: #ff6f00;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+            margin: 0 auto;
+            width: 80%;
+            box-sizing: border-box;
         }
 
         #department-list.show {
-            max-height: 500px; /* Adjust based on content */
+            max-height: 200px; /* Adjust based on content */
         }
 
-        #department-list label {
-            display: block;
+        .checkbox-container {
+            display: flex;
+            align-items: center;
             margin: 10px 0;
+        }
+
+        .checkbox-container input {
+            margin-right: 10px;
         }
 
         #department-images {
@@ -106,7 +123,8 @@
             font-size: 16px;
             cursor: pointer;
             border-radius: 5px;
-            margin: 20px 0;
+            margin: 10px;
+            transition: background-color 0.3s ease;
         }
     </style>
 </head>
@@ -121,15 +139,27 @@
             <p id="address" class="message"></p> <!-- Display address -->
         </div>
 
-        <div id="department-buttons" style="display: none;">
+        <div id="department-buttons">
             <button id="choose-departments-button" onclick="toggleDepartmentList()">Choose Departments</button>
-            <div id="department-list" class="department-list">
-                <label><input type="checkbox" name="department" value="ambulance"> Ambulance</label>
-                <label><input type="checkbox" name="department" value="firefighter"> Firefighter</label>
-                <label><input type="checkbox" name="department" value="rescue"> Rescue</label>
-                <label><input type="checkbox" name="department" value="police"> Police</label>
+            <div id="department-list">
+                <div class="checkbox-container">
+                    <input type="checkbox" id="ambulance" value="ambulance">
+                    <label for="ambulance">Ambulance</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="firefighter" value="firefighter">
+                    <label for="firefighter">Firefighter</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="rescue" value="rescue">
+                    <label for="rescue">Rescue</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="police" value="police">
+                    <label for="police">Police</label>
+                </div>
             </div>
-            <button id="send-alert-button" onclick="sendAlert()" style="display: none;">Send Alert</button>
+            <button id="send-alert-button" onclick="sendAlert()">Send Alert</button>
         </div>
 
         <div id="extra-info" style="display: none;">
@@ -186,11 +216,11 @@
         function toggleDepartmentList() {
             const departmentList = document.getElementById('department-list');
             departmentList.classList.toggle('show');
-            document.getElementById('send-alert-button').style.display = 'block';
         }
 
         function sendAlert() {
-            const selectedDepartments = Array.from(document.querySelectorAll('input[name="department"]:checked')).map(cb => cb.value);
+            const selectedDepartments = Array.from(document.querySelectorAll('#department-list input[type=checkbox]:checked'))
+                .map(checkbox => checkbox.value);
 
             if (selectedDepartments.length === 0) {
                 alert("Please select at least one department.");
@@ -206,9 +236,8 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('message').innerText = `Alert sent to: ${selectedDepartments.join(', ')}`;
-                document.getElementById('department-buttons').style.display = 'none';
-
+                document.getElementById('message').innerText = `Alert sent to ${selectedDepartments.join(', ')}`;
+                
                 const departmentImages = {
                     ambulance: 'images/ambulance.jpg',
                     firefighter: 'images/firefighter.jpg',
@@ -216,18 +245,20 @@
                     police: 'images/police.jpg'
                 };
 
-                const alertImageContainer = document.getElementById('department-images');
-                alertImageContainer.innerHTML = '';
-
+                const alertImage = document.getElementById('department-image');
+                document.getElementById('department-images').innerHTML = '';
                 selectedDepartments.forEach(department => {
                     const img = document.createElement('img');
                     img.src = departmentImages[department];
-                    img.id = 'department-image';
                     img.alt = `${department.charAt(0).toUpperCase() + department.slice(1)} Image`;
-                    alertImageContainer.appendChild(img);
+                    img.id = 'department-image';
+                    document.getElementById('department-images').appendChild(img);
                 });
 
-                alertImageContainer.style.display = 'block';
+                document.getElementById('department-images').style.display = 'block';
+
+                // Hide department buttons and send alert button
+                document.getElementById('department-buttons').style.display = 'none';
 
                 // Show the extra information section
                 document.getElementById('extra-info').style.display = 'block';
@@ -260,12 +291,14 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('message').innerText = "Details submitted successfully.";
+                document.getElementById('message').innerText = "Details sent successfully.";
                 document.getElementById('extra-info').style.display = 'none';
+                document.getElementById('department-images').style.display = 'none';
+                document.getElementById('send-location-button').style.display = 'block';
             })
             .catch(error => {
                 console.error('Error:', error);
-                document.getElementById('message').innerText = "Failed to submit details.";
+                document.getElementById('message').innerText = "Failed to send details.";
             });
         }
     </script>
