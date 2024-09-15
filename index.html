@@ -58,6 +58,7 @@
 
         #department-buttons {
             display: none;
+            margin-top: 20px; /* Ensure some spacing from the button */
         }
 
         #department-list {
@@ -76,6 +77,15 @@
 
         #department-list.show {
             max-height: 200px; /* Adjust based on content */
+        }
+
+        #placeholder {
+            background-color: #ff6f00;
+            height: 30px; /* Height of the placeholder */
+            margin: 10px 0;
+            border-radius: 5px;
+            width: 80%;
+            margin: 0 auto;
         }
 
         .checkbox-container {
@@ -141,6 +151,7 @@
 
         <div id="department-buttons">
             <button id="choose-departments-button" onclick="toggleDepartmentList()">Choose Departments</button>
+            <div id="placeholder"></div> <!-- Placeholder for animation -->
             <div id="department-list">
                 <div class="checkbox-container">
                     <input type="checkbox" id="ambulance" value="ambulance">
@@ -215,7 +226,15 @@
 
         function toggleDepartmentList() {
             const departmentList = document.getElementById('department-list');
-            departmentList.classList.toggle('show');
+            const placeholder = document.getElementById('placeholder');
+
+            if (departmentList.classList.contains('show')) {
+                departmentList.classList.remove('show');
+                placeholder.style.height = '30px'; // Reset to original height
+            } else {
+                departmentList.classList.add('show');
+                placeholder.style.height = '200px'; // Adjust based on content
+            }
         }
 
         function sendAlert() {
