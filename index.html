@@ -52,20 +52,12 @@
             background-color: #e65c00;
         }
 
-        #department-buttons {
+        #department-buttons, #extra-info, #department-images {
             margin-top: 20px;
         }
 
-        #department-buttons #choose-departments-button {
-            margin-bottom: 10px;
-        }
-
-        #orange-line {
-            height: 4px;
-            background-color: #ff6f00;
-            margin: 20px auto;
-            width: 80%;
-            display: none; /* Initially hidden */
+        #department-buttons {
+            display: none;
         }
 
         #department-list {
@@ -80,6 +72,7 @@
             margin: 0 auto;
             width: 80%;
             box-sizing: border-box;
+            font-size: 18px; /* Make the text inside the orange box larger */
         }
 
         #department-list.show {
@@ -90,7 +83,6 @@
             display: flex;
             align-items: center;
             margin: 10px 0;
-            font-size: 18px; /* Larger text inside the orange box */
         }
 
         .checkbox-container input {
@@ -98,7 +90,7 @@
         }
 
         #department-images {
-            margin-top: 20px;
+            display: none;
         }
 
         #department-image {
@@ -145,7 +137,6 @@
 
         <div id="form-container">
             <button id="send-location-button" onclick="sendLocation()">Send Location</button>
-            <div id="orange-line"></div> <!-- Orange line that will appear -->
             <p id="message" class="message"></p>
             <p id="address" class="message"></p> <!-- Display address -->
         </div>
@@ -179,7 +170,7 @@
             <button onclick="sendDetails()">Submit Details</button>
         </div>
 
-        <div id="department-images" style="display: none;">
+        <div id="department-images">
             <img id="department-image" src="" alt="Department Image">
         </div>
     </div>
@@ -208,9 +199,8 @@
                         document.getElementById('message').innerText = `Location sent: Latitude = ${latitude}, Longitude = ${longitude}`;
                         document.getElementById('address').innerText = `Address: ${address}`;
 
-                        // Hide the send location button and show the orange line and department buttons
+                        // Hide the send location button and show department buttons
                         document.getElementById('send-location-button').style.display = 'none';
-                        document.getElementById('orange-line').style.display = 'block';
                         document.getElementById('department-buttons').style.display = 'block';
                     })
                     .catch(error => {
@@ -228,13 +218,9 @@
         function toggleDepartmentList() {
             const departmentList = document.getElementById('department-list');
             departmentList.classList.toggle('show');
-
-            // Show the Send Alert button when the department list is visible
-            if (departmentList.classList.contains('show')) {
-                document.getElementById('send-alert-button').style.display = 'block';
-            } else {
-                document.getElementById('send-alert-button').style.display = 'none';
-            }
+            
+            // Show the send alert button after departments are selected
+            document.getElementById('send-alert-button').style.display = 'block';
         }
 
         function sendAlert() {
@@ -276,9 +262,9 @@
 
                 document.getElementById('department-images').style.display = 'block';
 
-                // Hide department buttons, send alert button, and orange line
+                // Hide department buttons and send alert button
                 document.getElementById('department-buttons').style.display = 'none';
-                document.getElementById('orange-line').style.display = 'none';
+                document.getElementById('send-alert-button').style.display = 'none';
 
                 // Show the extra information section
                 document.getElementById('extra-info').style.display = 'block';
@@ -293,6 +279,11 @@
             const userName = document.getElementById('user-name').value;
             const problemDetails = document.getElementById('problem-details').value;
 
+            if (!userName || !problemDetails) {
+                alert("Please fill out both fields.");
+                return;
+            }
+
             fetch('/send_details', {
                 method: 'POST',
                 headers: {
@@ -303,8 +294,7 @@
             .then(response => response.json())
             .then(data => {
                 document.getElementById('message').innerText = "Details submitted successfully.";
-                document.getElementById('extra-info').style.display = 'none';
-                document.getElementById('send-location-button').style.display = 'block'; // Reset for new entry
+                // Optionally, handle further UI changes or navigation
             })
             .catch(error => {
                 console.error('Error:', error);
