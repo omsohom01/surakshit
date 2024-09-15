@@ -56,6 +56,18 @@
             margin-top: 20px;
         }
 
+        #department-buttons {
+            display: none;
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.5s ease-out;
+        }
+
+        #department-buttons.show {
+            display: block;
+            max-height: 300px; /* Adjust as needed */
+        }
+
         #department-images {
             margin-top: 20px;
         }
@@ -82,6 +94,15 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
+
+        .department-item {
+            margin: 10px 0;
+            text-align: left;
+        }
+
+        .department-item label {
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -95,11 +116,26 @@
             <p id="address" class="message"></p> <!-- Display address -->
         </div>
 
-        <div id="department-buttons" style="display: none;">
-            <button onclick="sendAlert('ambulance')">Ambulance</button>
-            <button onclick="sendAlert('firefighter')">Firefighter</button>
-            <button onclick="sendAlert('rescue')">Rescue</button>
-            <button onclick="sendAlert('police')">Police</button>
+        <button id="choose-departments-button" onclick="toggleDepartments()">Choose Departments</button>
+        
+        <div id="department-buttons">
+            <div class="department-item">
+                <input type="checkbox" id="ambulance" name="department" value="ambulance">
+                <label for="ambulance">Ambulance</label>
+            </div>
+            <div class="department-item">
+                <input type="checkbox" id="firefighter" name="department" value="firefighter">
+                <label for="firefighter">Firefighter</label>
+            </div>
+            <div class="department-item">
+                <input type="checkbox" id="rescue" name="department" value="rescue">
+                <label for="rescue">Rescue</label>
+            </div>
+            <div class="department-item">
+                <input type="checkbox" id="police" name="department" value="police">
+                <label for="police">Police</label>
+            </div>
+            <button onclick="sendAlert()">Send Alert</button>
         </div>
 
         <div id="extra-info" style="display: none;">
@@ -139,7 +175,7 @@
 
                         // Hide the send location button and show department buttons
                         document.getElementById('send-location-button').style.display = 'none';
-                        document.getElementById('department-buttons').style.display = 'block';
+                        document.getElementById('choose-departments-button').style.display = 'block';
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -153,22 +189,59 @@
             }
         }
 
-        function sendAlert(department) {
+        function toggleDepartments() {
+            const deptButtons = document.getElementById('department-buttons');
+            deptButtons.classList.toggle('show');
+        }
+
+        function sendAlert() {
+            const selectedDepartments = Array.from(document.querySelectorAll('input[name="department"]:checked'))
+                                            .map(checkbox => checkbox.value);
+            if (selectedDepartments.length === 0) {
+                alert("Please select at least one department.");
+                return;
+            }
+
             fetch('/send_alert', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ department: department })
+                body: JSON.stringify({ departments: selectedDepartments })
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('message').innerText = data.status;
+                document.getElementById('message').innerText = `Alert sent to ${selectedDepartments.join(', ')}`;
+                
+                // Update department images
+                const departmentImages = {
+                    ambulance: 'images/ambulance.jpg',
+                    firefighter: 'images/firefighter.jpg',
+                    rescue: 'images/rescuer.jpg',
+                    police: 'images/police.jpg'
+                };
 
-                // Show the extra info form and department image based on the alert sent
+                const departmentImagesDiv = document.getElementById('department-images');
+                const alertImage = document.getElementById('department-image');
+                
+                alertImage.src = ''; // Clear any previous image
+                departmentImagesDiv.style.display = 'none';
+                
+                selectedDepartments.forEach(department => {
+                    const img = document.createElement('img');
+                    img.src = departmentImages[department];
+                    img.style.width = '100%';
+                    img.style.maxWidth = '400px';
+                    img.style.height = 'auto';
+                    departmentImagesDiv.appendChild(img);
+                });
+                
+                if (selectedDepartments.length > 0) {
+                    departmentImagesDiv.style.display = 'block';
+                }
+
+                // Show the extra information section
                 document.getElementById('extra-info').style.display = 'block';
-                document.getElementById('department-images').style.display = 'block';
-                document.getElementById('department-image').src = `images/${department}.jpg`;
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -177,19 +250,29 @@
         }
 
         function sendDetails() {
-            const name = document.getElementById('user-name').value;
-            const details = document.getElementById('problem-details').value;
+            const userName = document.getElementById('user-name').value;
+            const problemDetails = document.getElementById('problem-details').value;
+
+            if (!userName || !problemDetails) {
+                alert("Please fill out both fields.");
+                return;
+            }
 
             fetch('/send_details', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ name: name, details: details, address: address })
+                body: JSON.stringify({
+                    name: userName,
+                    details: problemDetails,
+                    address: address
+                })
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('message').innerText = data.status;
+                document.getElementById('message').innerText = "Details submitted successfully.";
+                document.getElementById('extra-info').style.display = 'none';
             })
             .catch(error => {
                 console.error('Error:', error);
