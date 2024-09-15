@@ -269,7 +269,7 @@
                 selectedDepartments.forEach(department => {
                     const img = document.createElement('img');
                     img.src = departmentImages[department];
-                    img.alt = `${department.charAt(0).toUpperCase() + department.slice(1)} Image`;
+                    img.alt = `${department} Image`;
                     img.id = 'department-image';
                     document.getElementById('department-images').appendChild(img);
                 });
