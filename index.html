@@ -127,6 +127,11 @@
             margin: 10px;
             transition: background-color 0.3s ease;
             display: none; /* Initially hidden */
+            margin-top: 20px;
+            /* Centering the button */
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
     </style>
 </head>
@@ -289,7 +294,11 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ userName: userName, problemDetails: problemDetails })
+                body: JSON.stringify({
+                    name: userName,
+                    details: problemDetails,
+                    address: address
+                })
             })
             .then(response => response.json())
             .then(data => {
