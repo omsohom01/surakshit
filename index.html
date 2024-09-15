@@ -52,12 +52,7 @@
             background-color: #e65c00;
         }
 
-        #department-buttons, #extra-info {
-            margin-top: 20px;
-        }
-
-        #department-buttons {
-            display: none; /* Hide initially */
+        #extra-info {
             margin-top: 20px;
         }
 
@@ -90,7 +85,6 @@
 
         #department-container {
             position: relative;
-            display: none; /* Initially hidden */
         }
 
         #choose-department-button {
@@ -110,17 +104,16 @@
         }
 
         #department-list {
-            display: none;
             background-color: #ff6f00;
             border-radius: 5px;
             overflow: hidden;
             max-height: 0; /* Initially hidden */
             transition: max-height 0.5s ease-out;
+            margin-top: 10px;
         }
 
         #department-list.show {
-            display: block;
-            max-height: 200px; /* Adjust as needed */
+            max-height: 300px; /* Adjust as needed */
         }
 
         #department-list button {
