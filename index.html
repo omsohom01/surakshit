@@ -68,11 +68,11 @@
             margin: 0 auto;
             width: 80%;
             box-sizing: border-box;
-            font-size: 18px; /* Make the text inside the orange box larger */
+            font-size: 18px;
         }
 
         #department-list.show {
-            max-height: 300px; /* Adjust based on content */
+            max-height: 300px;
         }
 
         .checkbox-container {
@@ -89,16 +89,17 @@
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 10px; /* Space between images */
+            gap: 10px;
             margin-top: 20px;
-            display: none; /* Initially hidden */
+            display: none;
         }
 
         #department-images img {
-            width: 300px; /* Adjust width as needed */
+            width: 300px;
             height: auto;
             border-radius: 5px;
             display: block;
+            margin: 0 auto;
         }
 
         #extra-info {
@@ -127,16 +128,15 @@
             border-radius: 5px;
             margin: 10px;
             transition: background-color 0.3s ease;
-            display: none; /* Initially hidden */
+            display: none;
             margin-top: 20px;
-            display: block;
             margin-left: auto;
             margin-right: auto;
         }
 
         .message {
-            color: red; /* Set the color of received messages to red */
-            font-size: 18px; /* Adjust font size as needed */
+            color: red;
+            font-size: 18px;
             margin-top: 20px;
         }
     </style>
@@ -149,7 +149,7 @@
         <div id="form-container">
             <button id="send-location-button" onclick="sendLocation()">Send Location</button>
             <p id="message" class="message"></p>
-            <p id="address" class="message"></p> <!-- Display address -->
+            <p id="address" class="message"></p>
         </div>
 
         <div id="department-buttons" style="display: none;">
@@ -182,12 +182,11 @@
         </div>
 
         <div id="department-images">
-            <!-- Department images will be added here dynamically -->
         </div>
     </div>
 
     <script>
-        let address = ""; // Variable to store the address
+        let address = "";
 
         function sendLocation() {
             if (navigator.geolocation) {
@@ -195,7 +194,6 @@
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
 
-                    // Send the coordinates to the server
                     fetch('/send_location', {
                         method: 'POST',
                         headers: {
@@ -205,12 +203,9 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        // Store the address and display it
                         address = data.address;
                         document.getElementById('message').innerText = `Location sent: Latitude = ${latitude}, Longitude = ${longitude}`;
                         document.getElementById('address').innerText = `Address: ${address}`;
-
-                        // Hide the send location button and show department buttons
                         document.getElementById('send-location-button').style.display = 'none';
                         document.getElementById('department-buttons').style.display = 'block';
                     })
@@ -237,9 +232,9 @@
             const anyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
 
             if (anyChecked) {
-                sendAlertButton.style.display = 'block'; // Show the button if any department is selected
+                sendAlertButton.style.display = 'block';
             } else {
-                sendAlertButton.style.display = 'none'; // Hide the button if no departments are selected
+                sendAlertButton.style.display = 'none';
             }
         }
 
@@ -262,16 +257,16 @@
             .then(response => response.json())
             .then(data => {
                 document.getElementById('message').innerText = `Alert sent to ${selectedDepartments.join(', ')}`;
-                
+
                 const departmentImages = {
                     ambulance: 'images/ambulance.jpg',
                     firefighter: 'images/firefighter.jpg',
-                    rescue: 'images/rescuer.jpg',
+                    rescue: 'images/rescue.jpg',
                     police: 'images/police.jpg'
                 };
 
                 const imagesContainer = document.getElementById('department-images');
-                imagesContainer.innerHTML = ''; // Clear existing images
+                imagesContainer.innerHTML = '';
 
                 selectedDepartments.forEach(department => {
                     const img = document.createElement('img');
@@ -280,10 +275,8 @@
                     imagesContainer.appendChild(img);
                 });
 
-                imagesContainer.style.display = 'flex'; // Show the images
-                // Hide department buttons and extra info
-                document.getElementById('department-buttons').style.display = 'none';
                 document.getElementById('extra-info').style.display = 'block';
+                document.getElementById('department-buttons').style.display = 'none';
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -296,7 +289,7 @@
             const problemDetails = document.getElementById('problem-details').value;
 
             if (!userName || !problemDetails) {
-                alert("Please fill in all details.");
+                alert("Please fill out both fields.");
                 return;
             }
 
@@ -305,14 +298,17 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ userName: userName, problemDetails: problemDetails })
+                body: JSON.stringify({
+                    name: userName,
+                    details: problemDetails,
+                    address: address
+                })
             })
             .then(response => response.json())
             .then(data => {
                 document.getElementById('message').innerText = "Details submitted successfully.";
-                
-                // Hide extra info section
-                document.getElementById('extra-info').style.display = 'none';
+                document.getElementById('extra-info').style.display = 'none'; // Hide extra info after submission
+                document.getElementById('department-images').style.display = 'block'; // Ensure images are displayed
             })
             .catch(error => {
                 console.error('Error:', error);
