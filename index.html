@@ -85,22 +85,42 @@
             margin-right: 10px;
         }
 
-        #department-images {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px; /* Space between images */
-            margin-top: 20px;
-            display: none; /* Initially hidden */
-        }
+      #department-images {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
 
-        #department-images img {
-            width: 300px; /* Adjust width as needed */
-            height: auto;
-            border-radius: 5px;
-            display: block;
-            margin: 0 auto;
-        }
+/* For 1-2 images, display them horizontally */
+#department-images img {
+    width: 45%;
+    height: auto;
+}
+
+/* For 3 images, display 2 in one row and 1 centered in the next */
+#department-images.three img {
+    width: 45%;
+    height: auto;
+}
+
+#department-images.three img:nth-child(3) {
+    width: 90%; /* Make the third image centered */
+}
+
+/* For 4 images, display them in a square (2x2 grid) */
+#department-images.four {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+#department-images img {
+    width: 100%;
+    height: auto;
+}
+
 
         #extra-info {
             display: none;
