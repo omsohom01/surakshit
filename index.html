@@ -52,50 +52,90 @@
             background-color: #e65c00;
         }
 
-        #department-buttons, #extra-info {
+        #department-buttons {
             margin-top: 20px;
+        }
+
+        #department-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+            background-color: #ff6f00;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+            margin: 0 auto;
+            width: 80%;
+            box-sizing: border-box;
+            font-size: 18px; /* Make the text inside the orange box larger */
+        }
+
+        #department-list.show {
+            max-height: 300px; /* Adjust based on content */
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .checkbox-container input {
+            margin-right: 10px;
         }
 
         #department-images {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
+            gap: 10px; /* Space between images */
             margin-top: 20px;
+            display: none; /* Initially hidden */
         }
 
-        .department-image {
-            margin: 10px;
-            max-width: 150px;
-            max-height: 150px;
-            object-fit: cover;
+        #department-images img {
+            width: 300px; /* Adjust width as needed */
+            height: auto;
+            border-radius: 5px;
+            display: block;
+            margin: 0 auto;
         }
 
-        .message {
-            color: #ff0000;
-            font-size: 18px;
-            margin-top: 20px;
+        #extra-info {
+            display: none;
+            text-align: left;
+            margin: 0 auto;
+            width: 80%;
+            box-sizing: border-box;
         }
 
-        input, textarea {
-            width: 90%;
-            max-width: 400px;
+        #extra-info input, #extra-info textarea {
+            width: 100%;
             padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
+            margin-top: 10px;
+            border: 1px solid #ddd;
             border-radius: 5px;
         }
 
-        textarea {
-            height: 100px;
+        #send-alert-button {
+            background-color: #ff6f00;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 10px;
+            transition: background-color 0.3s ease;
+            display: none; /* Initially hidden */
+            margin-top: 20px;
         }
 
-        #extra-info textarea {
-            display: block;
-            margin: 0 auto 10px auto;
-        }
-
-        #submit-details {
-            margin-top: 10px;
+        .message {
+            color: red; /* Set the color of received messages to red */
+            font-size: 18px; /* Adjust font size as needed */
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -111,24 +151,41 @@
         </div>
 
         <div id="department-buttons" style="display: none;">
-            <button onclick="sendAlert('ambulance')">Ambulance</button>
-            <button onclick="sendAlert('firefighter')">Firefighter</button>
-            <button onclick="sendAlert('rescue')">Rescue</button>
-            <button onclick="sendAlert('police')">Police</button>
+            <button id="choose-departments-button" onclick="toggleDepartmentList()">Choose Departments</button>
+            <div id="department-list">
+                <div class="checkbox-container">
+                    <input type="checkbox" id="ambulance" value="ambulance" onchange="updateSendAlertButtonVisibility()">
+                    <label for="ambulance">Ambulance</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="firefighter" value="firefighter" onchange="updateSendAlertButtonVisibility()">
+                    <label for="firefighter">Firefighter</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="rescue" value="rescue" onchange="updateSendAlertButtonVisibility()">
+                    <label for="rescue">Rescue</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="police" value="police" onchange="updateSendAlertButtonVisibility()">
+                    <label for="police">Police</label>
+                </div>
+            </div>
+            <button id="send-alert-button" onclick="sendAlert()">Send Alert</button>
         </div>
 
-        <div id="extra-info" style="display: none;">
+        <div id="extra-info">
             <input type="text" id="user-name" placeholder="Your Name">
             <textarea id="problem-details" placeholder="Describe the problem..."></textarea>
-            <button id="submit-details" onclick="sendDetails()">Submit Details</button>
+            <button onclick="sendDetails()">Submit Details</button>
         </div>
 
-        <div id="department-images" style="display: none;"></div>
+        <div id="department-images">
+            <!-- Department images will be added here dynamically -->
+        </div>
     </div>
 
     <script>
-        let address = "";
-        let selectedDepartments = [];
+        let address = ""; // Variable to store the address
 
         function sendLocation() {
             if (navigator.geolocation) {
@@ -136,19 +193,22 @@
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
 
+                    // Send the coordinates to the server
                     fetch('/send_location', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ latitude, longitude })
+                        body: JSON.stringify({ latitude: latitude, longitude: longitude })
                     })
                     .then(response => response.json())
                     .then(data => {
+                        // Store the address and display it
                         address = data.address;
                         document.getElementById('message').innerText = `Location sent: Latitude = ${latitude}, Longitude = ${longitude}`;
                         document.getElementById('address').innerText = `Address: ${address}`;
 
+                        // Hide the send location button and show department buttons
                         document.getElementById('send-location-button').style.display = 'none';
                         document.getElementById('department-buttons').style.display = 'block';
                     })
@@ -164,59 +224,69 @@
             }
         }
 
-        function sendAlert(department) {
-            selectedDepartments.push(department);
+        function toggleDepartmentList() {
+            const departmentList = document.getElementById('department-list');
+            departmentList.classList.toggle('show');
+        }
+
+        function updateSendAlertButtonVisibility() {
+            const checkboxes = document.querySelectorAll('#department-list input[type=checkbox]');
+            const sendAlertButton = document.getElementById('send-alert-button');
+            const anyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+
+            if (anyChecked) {
+                sendAlertButton.style.display = 'block'; // Show the button if any department is selected
+            } else {
+                sendAlertButton.style.display = 'none'; // Hide the button if no departments are selected
+            }
+        }
+
+        function sendAlert() {
+            const selectedDepartments = Array.from(document.querySelectorAll('#department-list input[type=checkbox]:checked'))
+                .map(checkbox => checkbox.value);
+
+            if (selectedDepartments.length === 0) {
+                alert("Please select at least one department.");
+                return;
+            }
+
             fetch('/send_alert', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ department })
+                body: JSON.stringify({ departments: selectedDepartments })
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('message').innerText = `Alert sent to ${department.charAt(0).toUpperCase() + department.slice(1)}`;
-                document.getElementById('department-buttons').style.display = 'none';
-
+                document.getElementById('message').innerText = `Alert sent to ${selectedDepartments.join(', ')}`;
+                
                 const departmentImages = {
                     ambulance: 'images/ambulance.jpg',
                     firefighter: 'images/firefighter.jpg',
-                    rescue: 'images/rescuer.jpg',
+                    rescue: 'images/rescue.jpg',
                     police: 'images/police.jpg'
                 };
 
-                updateImages();
+                const imagesContainer = document.getElementById('department-images');
+                imagesContainer.innerHTML = ''; // Clear existing images
 
+                selectedDepartments.forEach(department => {
+                    const img = document.createElement('img');
+                    img.src = departmentImages[department];
+                    img.alt = department;
+                    imagesContainer.appendChild(img);
+                });
+
+                // Show extra info section
                 document.getElementById('extra-info').style.display = 'block';
+                // Hide department buttons
+                document.getElementById('department-buttons').style.display = 'none';
             })
             .catch(error => {
                 console.error('Error:', error);
                 document.getElementById('message').innerText = "Failed to send alert.";
             });
-        }
-
-        function updateImages() {
-            const departmentImagesDiv = document.getElementById('department-images');
-            departmentImagesDiv.innerHTML = '';
-
-            selectedDepartments.forEach(dept => {
-                const img = document.createElement('img');
-                img.src = `images/${dept}.jpg`;
-                img.alt = `${dept.charAt(0).toUpperCase() + dept.slice(1)} Image`;
-                img.className = 'department-image';
-                departmentImagesDiv.appendChild(img);
-            });
-
-            if (selectedDepartments.length === 1 || selectedDepartments.length === 2) {
-                departmentImagesDiv.style.flexDirection = 'row';
-            } else if (selectedDepartments.length === 3) {
-                departmentImagesDiv.style.flexDirection = 'row';
-            } else if (selectedDepartments.length === 4) {
-                departmentImagesDiv.style.flexDirection = 'row';
-                departmentImagesDiv.style.flexWrap = 'wrap';
-            }
-
-            document.getElementById('department-images').style.display = 'flex';
         }
 
         function sendDetails() {
@@ -242,7 +312,7 @@
             .then(response => response.json())
             .then(data => {
                 document.getElementById('message').innerText = "Details submitted successfully.";
-                document.getElementById('extra-info').style.display = 'none';
+                // Optionally, handle further UI changes or navigation
             })
             .catch(error => {
                 console.error('Error:', error);
