@@ -120,17 +120,66 @@
     max-width: 300px; /* Increased max width */
     border-radius: 10px;
 }
-/* Hide the send details section initially */
-#extra-info {
-    display: none;
-    margin-top: 20px;
+function sendAlert() {
+    const selectedDepartments = Array.from(document.querySelectorAll('#department-list input[type=checkbox]:checked'))
+        .map(checkbox => checkbox.value);
+
+    if (selectedDepartments.length === 0) {
+        alert("Please select at least one department.");
+        return;
+    }
+
+    fetch('/send_alert', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ departments: selectedDepartments })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('message').innerText = `Alert sent to ${selectedDepartments.join(', ')}`;
+
+        // Display department images
+        const departmentImages = {
+            ambulance: 'images/ambulance.jpg',
+            firefighter: 'images/firefighter.jpg',
+            rescue: 'images/rescuer.jpg',
+            police: 'images/police.jpg'
+        };
+
+        const departmentImagesContainer = document.getElementById('department-images');
+        departmentImagesContainer.innerHTML = ''; // Clear previous images
+        selectedDepartments.forEach(department => {
+            const img = document.createElement('img');
+            img.src = departmentImages[department];
+            img.alt = `${department.charAt(0).toUpperCase() + department.slice(1)} Image`;
+            departmentImagesContainer.appendChild(img);
+        });
+
+        // Display images based on the number of selected departments
+        if (selectedDepartments.length === 1 || selectedDepartments.length === 2) {
+            departmentImagesContainer.className = 'two';
+        } else if (selectedDepartments.length === 3) {
+            departmentImagesContainer.className = 'three';
+        } else if (selectedDepartments.length === 4) {
+            departmentImagesContainer.className = 'four';
+        }
+
+        departmentImagesContainer.style.display = 'grid';
+
+        // Hide department buttons and send alert button
+        document.getElementById('department-buttons').style.display = 'none';
+
+        // Show the send details section
+        document.getElementById('extra-info').classList.add('active');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('message').innerText = "Failed to send alert.";
+    });
 }
 
-/* Style adjustments for the details section */
-#extra-info.active {
-    display: block;
-    margin-top: 20px; /* Keep minimal space between images and details */
-}
 
 
 
@@ -259,7 +308,6 @@
                 sendAlertButton.style.display = 'none'; // Hide the button if no departments are selected
             }
         }
-
 function sendAlert() {
     const selectedDepartments = Array.from(document.querySelectorAll('#department-list input[type=checkbox]:checked'))
         .map(checkbox => checkbox.value);
@@ -280,38 +328,12 @@ function sendAlert() {
     .then(data => {
         document.getElementById('message').innerText = `Alert sent to ${selectedDepartments.join(', ')}`;
 
-        // Display department images
-        const departmentImages = {
-            ambulance: 'images/ambulance.jpg',
-            firefighter: 'images/firefighter.jpg',
-            rescue: 'images/rescuer.jpg',
-            police: 'images/police.jpg'
-        };
-
-        const departmentImagesContainer = document.getElementById('department-images');
-        departmentImagesContainer.innerHTML = ''; // Clear previous images
-        selectedDepartments.forEach(department => {
-            const img = document.createElement('img');
-            img.src = departmentImages[department];
-            img.alt = `${department.charAt(0).toUpperCase() + department.slice(1)} Image`;
-            departmentImagesContainer.appendChild(img);
-        });
-
-        // Display images based on the number of selected departments
-        if (selectedDepartments.length === 1 || selectedDepartments.length === 2) {
-            departmentImagesContainer.className = 'two';
-        } else if (selectedDepartments.length === 3) {
-            departmentImagesContainer.className = 'three';
-        } else if (selectedDepartments.length === 4) {
-            departmentImagesContainer.className = 'four';
-        }
-
-        departmentImagesContainer.style.display = 'grid';
+        // Handle department images display logic here
 
         // Hide department buttons and send alert button
         document.getElementById('department-buttons').style.display = 'none';
 
-        // Show the send details section
+        // Show the send details section with original layout
         document.getElementById('extra-info').classList.add('active');
     })
     .catch(error => {
@@ -319,11 +341,6 @@ function sendAlert() {
         document.getElementById('message').innerText = "Failed to send alert.";
     });
 }
-
-
-
-
-
       function sendDetails() {
     const userName = document.getElementById('user-name').value;
     const problemDetails = document.getElementById('problem-details').value;
