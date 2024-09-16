@@ -93,34 +93,41 @@
     margin-top: 20px;
 }
 
-/* For 1-2 images, display them horizontally */
-#department-images img {
-    width: 45%;
-    height: auto;
+#department-images {
+    display: grid;
+    gap: 20px;
+    margin-top: 20px;
+    justify-content: center;
 }
 
-/* For 3 images, display 2 in one row and 1 centered in the next */
-#department-images.three img {
-    width: 45%;
-    height: auto;
+/* For 1-2 images: display them side by side */
+#department-images.two {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+/* For 3 images: display 2 images side by side, and 1 centered below them */
+#department-images.three {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto;
 }
 
 #department-images.three img:nth-child(3) {
-    width: 90%; /* Make the third image centered */
+    grid-column: span 2;
+    justify-self: center;
 }
 
-/* For 4 images, display them in a square (2x2 grid) */
+/* For 4 images: display in 2x2 grid */
 #department-images.four {
-    display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
 }
 
+/* General image styling */
 #department-images img {
     width: 100%;
     height: auto;
+    max-width: 200px; /* Set max width to keep images smaller */
+    border-radius: 10px;
 }
-
 
         #extra-info {
             display: none;
@@ -264,7 +271,7 @@
             }
         }
 
- function sendAlert() {
+function sendAlert() {
     const selectedDepartments = Array.from(document.querySelectorAll('#department-list input[type=checkbox]:checked'))
         .map(checkbox => checkbox.value);
 
@@ -294,7 +301,7 @@
 
         const imageContainer = document.getElementById('department-images');
         imageContainer.innerHTML = '';  // Clear previous images
-        imageContainer.classList.remove('three', 'four');  // Remove old classes
+        imageContainer.classList.remove('two', 'three', 'four');  // Remove old classes
 
         selectedDepartments.forEach(department => {
             const img = document.createElement('img');
@@ -304,14 +311,16 @@
         });
 
         // Add layout classes based on number of departments
-        if (selectedDepartments.length === 3) {
+        if (selectedDepartments.length === 2) {
+            imageContainer.classList.add('two');
+        } else if (selectedDepartments.length === 3) {
             imageContainer.classList.add('three');
         } else if (selectedDepartments.length === 4) {
             imageContainer.classList.add('four');
         }
 
         // Show the department images
-        imageContainer.style.display = 'flex';
+        imageContainer.style.display = 'grid';
 
         // Hide department buttons and send alert button
         document.getElementById('department-buttons').style.display = 'none';
@@ -324,6 +333,7 @@
         document.getElementById('message').innerText = "Failed to send alert.";
     });
 }
+
 
 
 
