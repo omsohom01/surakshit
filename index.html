@@ -244,7 +244,7 @@
             }
         }
 
-      function sendAlert() {
+  function sendAlert() {
     const selectedDepartments = Array.from(document.querySelectorAll('#department-list input[type=checkbox]:checked'))
         .map(checkbox => checkbox.value);
 
@@ -267,7 +267,7 @@
         const departmentImages = {
             ambulance: 'images/ambulance.jpg',
             firefighter: 'images/firefighter.jpg',
-            rescue: 'images/rescue.jpg',
+            rescue: 'images/rescuer.jpg',  // Corrected to "rescuer.jpg"
             police: 'images/police.jpg'
         };
 
@@ -296,6 +296,7 @@
         document.getElementById('message').innerText = "Failed to send alert.";
     });
 }
+
 
         function sendDetails() {
             const userName = document.getElementById('user-name').value;
