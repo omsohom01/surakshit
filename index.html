@@ -72,11 +72,11 @@
             margin: 0 auto;
             width: 80%;
             box-sizing: border-box;
-            font-size: 18px;
+            font-size: 18px; /* Make the text inside the orange box larger */
         }
 
         #department-list.show {
-            max-height: 300px;
+            max-height: 300px; /* Adjust based on content */
         }
 
         .checkbox-container {
@@ -117,7 +117,16 @@
         }
 
         #send-alert-button {
-            display: none;
+            background-color: #ff6f00;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 10px;
+            transition: background-color 0.3s ease;
+            display: none; /* Initially hidden */
         }
     </style>
 </head>
@@ -129,7 +138,7 @@
         <div id="form-container">
             <button id="send-location-button" onclick="sendLocation()">Send Location</button>
             <p id="message" class="message"></p>
-            <p id="address" class="message"></p>
+            <p id="address" class="message"></p> <!-- Display address -->
         </div>
 
         <div id="department-buttons">
@@ -161,113 +170,132 @@
             <button onclick="sendDetails()">Submit Details</button>
         </div>
 
-        <div id="department-images"></div>
+        <div id="department-images">
+            <img id="department-image" src="" alt="Department Image">
+        </div>
     </div>
 
     <script>
-        let address = ""; // Variable to store the address globally
+        let address = ""; // Variable to store the address
 
-        // Send location to the server
         function sendLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position) {
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
 
+                    // Send the coordinates to the server
                     fetch('/send_location', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ latitude, longitude })
+                        body: JSON.stringify({ latitude: latitude, longitude: longitude })
                     })
                     .then(response => response.json())
                     .then(data => {
-                        document.getElementById('message').innerText = data.status;
-                        document.getElementById('address').innerText = data.address;
-                        address = data.address; // Store the received address
-                        showDepartmentButtons();
+                        // Store the address and display it
+                        address = data.address;
+                        document.getElementById('message').innerText = `Location sent: Latitude = ${latitude}, Longitude = ${longitude}`;
+                        document.getElementById('address').innerText = `Address: ${address}`;
+
+                        // Hide the send location button
+                        document.getElementById('send-location-button').style.display = 'none';
+
+                        // Show department buttons
+                        document.getElementById('department-buttons').style.display = 'block';
                     })
-                    .catch(error => console.error('Error:', error));
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('message').innerText = "Failed to send location.";
+                    });
+                }, function(error) {
+                    document.getElementById('message').innerText = "Error getting location: " + error.message;
                 });
             } else {
                 document.getElementById('message').innerText = "Geolocation is not supported by this browser.";
             }
         }
 
-        // Show department buttons after location is sent
-        function showDepartmentButtons() {
-            document.getElementById('department-buttons').style.display = 'block';
-        }
-
-        // Toggle department list visibility
         function toggleDepartmentList() {
             const departmentList = document.getElementById('department-list');
             departmentList.classList.toggle('show');
+            
+            // Show the send alert button after departments are selected
             document.getElementById('send-alert-button').style.display = 'block';
         }
 
-        // Send alert to the selected departments
         function sendAlert() {
-            const departments = [];
-            document.querySelectorAll('#department-list input[type="checkbox"]:checked').forEach(function(checkbox) {
-                departments.push(checkbox.value);
-            });
+            const selectedDepartments = Array.from(document.querySelectorAll('#department-list input[type=checkbox]:checked'))
+                .map(checkbox => checkbox.value);
+
+            if (selectedDepartments.length === 0) {
+                alert("Please select at least one department.");
+                return;
+            }
 
             fetch('/send_alert', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ departments })
+                body: JSON.stringify({ departments: selectedDepartments })
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('message').innerText = data.status;
+                document.getElementById('message').innerText = `Alert sent to ${selectedDepartments.join(', ')}`;
+                
+                const departmentImages = {
+                    ambulance: 'images/ambulance.jpg',
+                    firefighter: 'images/firefighter.jpg',
+                    rescue: 'images/rescuer.jpg', // Updated to 'rescuer.jpg'
+                    police: 'images/police.jpg'
+                };
+
+                const alertImage = document.getElementById('department-image');
+                document.getElementById('department-images').innerHTML = '';
+                selectedDepartments.forEach(department => {
+                    const img = document.createElement('img');
+                    img.src = departmentImages[department];
+                    img.alt = `${department.charAt(0).toUpperCase() + department.slice(1)} Image`;
+                    img.id = 'department-image';
+                    document.getElementById('department-images').appendChild(img);
+                });
+
+                document.getElementById('department-images').style.display = 'block';
+
+                // Hide department buttons and send alert button
                 document.getElementById('department-buttons').style.display = 'none';
-                showExtraInfo();
-                displayDepartmentImages(departments);
+                document.getElementById('send-alert-button').style.display = 'none';
+
+                // Show the extra information section
+                document.getElementById('extra-info').style.display = 'block';
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('message').innerText = "Failed to send alert.";
+            });
         }
 
-        // Show extra info inputs (Name, Problem description)
-        function showExtraInfo() {
-            document.getElementById('extra-info').style.display = 'block';
-        }
-
-        // Send user details to the server
         function sendDetails() {
-            const name = document.getElementById('user-name').value;
-            const details = document.getElementById('problem-details').value;
+            const userName = document.getElementById('user-name').value;
+            const problemDetails = document.getElementById('problem-details').value;
 
             fetch('/send_details', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ name, details, address })
+                body: JSON.stringify({ userName: userName, problemDetails: problemDetails })
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('message').innerText = data.status;
+                document.getElementById('message').innerText = "Details submitted successfully.";
                 document.getElementById('extra-info').style.display = 'none';
             })
-            .catch(error => console.error('Error:', error));
-        }
-
-        // Display department images based on selected departments
-        function displayDepartmentImages(departments) {
-            const departmentImagesDiv = document.getElementById('department-images');
-            departmentImagesDiv.style.display = 'block';
-            departmentImagesDiv.innerHTML = ''; // Clear previous images
-
-            departments.forEach(function(department) {
-                const img = document.createElement('img');
-                img.id = 'department-image';
-                img.src = `images/${department}.jpg`; // Assuming images are named as ambulance.jpg, firefighter.jpg, etc.
-                img.alt = `${department} image`;
-                departmentImagesDiv.appendChild(img);
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('message').innerText = "Failed to submit details.";
             });
         }
     </script>
