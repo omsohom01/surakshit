@@ -54,10 +54,17 @@
 
         #department-buttons {
             display: none;
+            overflow: hidden;
+            max-height: 0;
             background-color: #ff6f00;
             border-radius: 10px;
-            padding: 20px;
-            transition: all 0.5s ease-in-out;
+            padding: 0;
+            transition: max-height 0.5s ease-in-out;
+        }
+
+        .expanded {
+            max-height: 300px; /* Enough to show all checkboxes */
+            padding: 20px; /* Padding once expanded */
         }
 
         #department-images {
@@ -101,6 +108,11 @@
         #extra-info {
             display: none;
         }
+
+        #send-alert-button {
+            display: none;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -118,6 +130,7 @@
             <button onclick="showDepartments()">Choose Department</button>
         </div>
 
+        <!-- Smoothly transitioning department options -->
         <div id="department-buttons">
             <div class="department-option">
                 <input class="checkbox" type="checkbox" id="ambulance" value="ambulance">
@@ -135,6 +148,10 @@
                 <input class="checkbox" type="checkbox" id="police" value="police">
                 <label for="police">Police</label>
             </div>
+        </div>
+
+        <!-- Send Alert Button outside the department box -->
+        <div id="send-alert-button">
             <button onclick="sendAlert()">Send Alert</button>
         </div>
 
@@ -191,7 +208,8 @@
 
         function showDepartments() {
             const departmentButtons = document.getElementById('department-buttons');
-            departmentButtons.style.display = 'block';
+            departmentButtons.classList.add('expanded');
+            document.getElementById('send-alert-button').style.display = 'block'; // Show send alert button
         }
 
         function sendAlert() {
@@ -214,6 +232,7 @@
             .then(data => {
                 document.getElementById('message').innerText = `Alert sent to: ${selectedDepartments.join(', ')}`;
                 document.getElementById('department-buttons').style.display = 'none';
+                document.getElementById('send-alert-button').style.display = 'none';
 
                 // Display multiple department images
                 const departmentImages = {
@@ -266,8 +285,8 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('message').innerText = "Details submitted successfully.";
-                document.getElementById('extra-info').style.display = 'none';
+                document.getElementById('message').innerText = "Details submitted successfully!";
+                document.getElementById('extra-info').style.display = 'none'; // Hide extra info section
             })
             .catch(error => {
                 console.error('Error:', error);
