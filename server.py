@@ -1,16 +1,12 @@
 from flask import Flask, request, jsonify, send_from_directory
 import os
 import logging
-import requests
 
-app = Flask(__name__)
+app = Flask(_name_)
 
 # Configure logging to display INFO level messages
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# OpenCage API Key
-OPENCAGE_API_KEY = '0a729828da444deba41bb4888ce3f7bc'
+logger = logging.getLogger(_name_)
 
 # Route to serve the index.html file directly from the main directory
 @app.route('/')
@@ -30,71 +26,59 @@ def images(filename):
         logger.exception(f"Error serving image: {filename}")
         return "Image not found", 404
 
-# Function to get address from coordinates using OpenCage API
-def get_address_from_coordinates(latitude, longitude):
-    try:
-        response = requests.get(
-            f'https://api.opencagedata.com/geocode/v1/json',
-            params={
-                'q': f'{latitude},{longitude}',
-                'key': OPENCAGE_API_KEY
-            }
-        )
-        response_data = response.json()
-        if response_data['results']:
-            return response_data['results'][0]['formatted']
-        return "Address not found"
-    except Exception as e:
-        logger.exception("Error getting address from OpenCage API")
-        return "Error retrieving address"
+# Dictionary to store department alerts
+alerts = {
+    "ambulance": "Ambulance",
+    "firefighter": "Firefighter",
+    "rescue": "Rescue",
+    "police": "Police"
+}
 
 # Route to receive and log the location from the client
 @app.route('/send_location', methods=['POST'])
 def send_location():
     try:
-        data = request.json
-        latitude = data['latitude']
-        longitude = data['longitude']
+        data = request.get_json()
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
 
-        # Get address from OpenCage API
-        address = get_address_from_coordinates(latitude, longitude)
+        if latitude is None or longitude is None:
+            logger.error("Latitude or Longitude not provided in the request.")
+            return jsonify({'message': 'Latitude and Longitude are required.'}), 400
 
-        logger.info(f"Location received: Latitude = {latitude}, Longitude = {longitude}, Address = {address}")
-        return jsonify({"status": "Location received", "address": address})
+        # Log the coordinates on the server
+        logger.info(f"Received coordinates: Latitude = {latitude}, Longitude = {longitude}")
+
+        # Respond back to the client
+        return jsonify({
+            'message': f"Location received: Latitude = {latitude}, Longitude = {longitude}",
+            'latitude': latitude,
+            'longitude': longitude
+        })
     except Exception as e:
-        logger.exception("Error processing location data")
-        return jsonify({"status": "Failed to receive location"}), 500
+        logger.exception("Error processing /send_location")
+        return jsonify({'message': 'Error processing location'}), 500
 
-# Route to receive and log the department alert
+# Route to receive and log alert department data
 @app.route('/send_alert', methods=['POST'])
 def send_alert():
     try:
-        data = request.json
-        departments = data.get('departments', [])
-        if departments:
-            department_names = ', '.join(departments)
-            logger.info(f"Alert sent to: {department_names}")
-            return jsonify({"status": f"Alert sent to {department_names}"})
-        else:
-            logger.warning("No departments selected")
-            return jsonify({"status": "No departments selected"}), 400
+        data = request.get_json()
+        department = data.get('department')
+
+        if department not in alerts:
+            logger.error(f"Invalid department: {department}")
+            return jsonify({'message': 'Invalid department'}), 400
+
+        # Log the alert department on the server
+        logger.info(f"Alert department received: {department}")
+
+        # Respond back to the client
+        return jsonify({'message': f'Alert sent to {alerts[department]}'})
     except Exception as e:
-        logger.exception("Error processing alert")
-        return jsonify({"status": "Failed to send alert"}), 500
+        logger.exception("Error processing /send_alert")
+        return jsonify({'message': 'Error processing alert'}), 500
 
-# Route to receive and log user details and problem description
-@app.route('/send_details', methods=['POST'])
-def send_details():
-    try:
-        data = request.json
-        name = data.get('userName')
-        problem_details = data.get('problemDetails')
-
-        logger.info(f"Details received: Name = {name}, Problem Details = {problem_details}")
-        return jsonify({"status": "Details received"})
-    except Exception as e:
-        logger.exception("Error processing user details")
-        return jsonify({"status": "Failed to receive details"}), 500
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+if _name_ == '_main_':
+    # Run the app on host 0.0.0.0 to make it accessible externally, and set port 5000
+    app.run(debug=True, host='0.0.0.0', port=5000)
