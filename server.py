@@ -30,14 +30,6 @@ def images(filename):
         logger.exception(f"Error serving image: {filename}")
         return "Image not found", 404
 
-# Dictionary to store department alerts
-alerts = {
-    "ambulance": "Ambulance",
-    "firefighter": "Firefighter",
-    "rescue": "Rescue",
-    "police": "Police"
-}
-
 # Function to get address from coordinates using OpenCage API
 def get_address_from_coordinates(latitude, longitude):
     try:
@@ -78,14 +70,18 @@ def send_location():
 def send_alert():
     try:
         data = request.json
-        department = data.get('department', '').lower()  # Convert to lowercase to make it case-insensitive
+        departments = data.get('departments', [])
+        alert_messages = []
 
-        if department in alerts:
-            logger.info(f"Alert sent to {alerts[department]}")
-            return jsonify({"status": f"Alert sent to {alerts[department]}"})
-        else:
-            logger.warning(f"Invalid department specified: {department}")
-            return jsonify({"status": "Invalid department"}), 400
+        for department in departments:
+            if department in ['ambulance', 'firefighter', 'rescue', 'police']:
+                alert_messages.append(f"Alert sent to {department.capitalize()}")
+            else:
+                logger.warning(f"Invalid department specified: {department}")
+                return jsonify({"status": "Invalid department"}), 400
+
+        logger.info(f"Alert sent to: {', '.join(departments)}")
+        return jsonify({"status": f"Alert sent to: {', '.join(departments)}"})
     except Exception as e:
         logger.exception("Error processing alert")
         return jsonify({"status": "Failed to send alert"}), 500
