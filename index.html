@@ -52,8 +52,12 @@
             background-color: #e65c00;
         }
 
-        #department-buttons {
+        #department-buttons, #extra-info {
             margin-top: 20px;
+        }
+
+        #department-buttons {
+            display: none;
         }
 
         #department-list {
@@ -68,11 +72,10 @@
             margin: 0 auto;
             width: 80%;
             box-sizing: border-box;
-            font-size: 18px; /* Make the text inside the orange box larger */
         }
 
         #department-list.show {
-            max-height: 300px; /* Adjust based on content */
+            max-height: 200px; /* Adjust based on content */
         }
 
         .checkbox-container {
@@ -86,35 +89,29 @@
         }
 
         #department-images {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px; /* Space between images */
             margin-top: 20px;
-            display: none; /* Initially hidden */
         }
 
-        #department-images img {
-            width: 300px; /* Adjust width as needed */
-            height: auto;
-            border-radius: 5px;
-            display: block;
-            margin: 0 auto;
-        }
-
-        #extra-info {
-            display: none;
-            text-align: left;
-            margin: 0 auto;
-            width: 80%;
-            box-sizing: border-box;
-        }
-
-        #extra-info input, #extra-info textarea {
+        #department-image {
             width: 100%;
+            max-width: 400px;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+        }
+
+        .message {
+            color: #ff0000;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        input, textarea {
+            width: 100%;
+            max-width: 400px;
             padding: 10px;
-            margin-top: 10px;
-            border: 1px solid #ddd;
+            margin: 10px 0;
+            border: 1px solid #ccc;
             border-radius: 5px;
         }
 
@@ -128,17 +125,6 @@
             border-radius: 5px;
             margin: 10px;
             transition: background-color 0.3s ease;
-            display: none; /* Initially hidden */
-            margin-top: 20px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .message {
-            color: red; /* Set the color of received messages to red */
-            font-size: 18px; /* Adjust font size as needed */
-            margin-top: 20px;
         }
     </style>
 </head>
@@ -153,37 +139,37 @@
             <p id="address" class="message"></p> <!-- Display address -->
         </div>
 
-        <div id="department-buttons" style="display: none;">
+        <div id="department-buttons">
             <button id="choose-departments-button" onclick="toggleDepartmentList()">Choose Departments</button>
             <div id="department-list">
                 <div class="checkbox-container">
-                    <input type="checkbox" id="ambulance" value="ambulance" onchange="updateSendAlertButtonVisibility()">
+                    <input type="checkbox" id="ambulance" value="ambulance">
                     <label for="ambulance">Ambulance</label>
                 </div>
                 <div class="checkbox-container">
-                    <input type="checkbox" id="firefighter" value="firefighter" onchange="updateSendAlertButtonVisibility()">
+                    <input type="checkbox" id="firefighter" value="firefighter">
                     <label for="firefighter">Firefighter</label>
                 </div>
                 <div class="checkbox-container">
-                    <input type="checkbox" id="rescue" value="rescue" onchange="updateSendAlertButtonVisibility()">
+                    <input type="checkbox" id="rescue" value="rescue">
                     <label for="rescue">Rescue</label>
                 </div>
                 <div class="checkbox-container">
-                    <input type="checkbox" id="police" value="police" onchange="updateSendAlertButtonVisibility()">
+                    <input type="checkbox" id="police" value="police">
                     <label for="police">Police</label>
                 </div>
             </div>
             <button id="send-alert-button" onclick="sendAlert()">Send Alert</button>
         </div>
 
-        <div id="extra-info">
+        <div id="extra-info" style="display: none;">
             <input type="text" id="user-name" placeholder="Your Name">
             <textarea id="problem-details" placeholder="Describe the problem..."></textarea>
             <button onclick="sendDetails()">Submit Details</button>
         </div>
 
-        <div id="department-images">
-            <!-- Department images will be added here dynamically -->
+        <div id="department-images" style="display: none;">
+            <img id="department-image" src="" alt="Department Image">
         </div>
     </div>
 
@@ -232,18 +218,6 @@
             departmentList.classList.toggle('show');
         }
 
-        function updateSendAlertButtonVisibility() {
-            const checkboxes = document.querySelectorAll('#department-list input[type=checkbox]');
-            const sendAlertButton = document.getElementById('send-alert-button');
-            const anyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
-
-            if (anyChecked) {
-                sendAlertButton.style.display = 'block'; // Show the button if any department is selected
-            } else {
-                sendAlertButton.style.display = 'none'; // Hide the button if no departments are selected
-            }
-        }
-
         function sendAlert() {
             const selectedDepartments = Array.from(document.querySelectorAll('#department-list input[type=checkbox]:checked'))
                 .map(checkbox => checkbox.value);
@@ -267,24 +241,27 @@
                 const departmentImages = {
                     ambulance: 'images/ambulance.jpg',
                     firefighter: 'images/firefighter.jpg',
-                    rescue: 'images/rescue.jpg',
+                    rescue: 'images/rescuer.jpg',
                     police: 'images/police.jpg'
                 };
 
-                const ImagesContainer = document.getElementById('department-images');
-                ImagesContainer.innerHTML = ''; // Clear existing images
-
+                const alertImage = document.getElementById('department-image');
+                document.getElementById('department-images').innerHTML = '';
                 selectedDepartments.forEach(department => {
                     const img = document.createElement('img');
                     img.src = departmentImages[department];
-                    img.alt = department;
-                    ImagesContainer.appendChild(img);
+                    img.alt = `${department.charAt(0).toUpperCase() + department.slice(1)} Image`;
+                    img.id = 'department-image';
+                    document.getElementById('department-images').appendChild(img);
                 });
 
-                // Show extra info section
-                document.getElementById('extra-info').style.display = 'block';
-                // Hide department buttons
+                document.getElementById('department-images').style.display = 'block';
+
+                // Hide department buttons and send alert button
                 document.getElementById('department-buttons').style.display = 'none';
+
+                // Show the extra information section
+                document.getElementById('extra-info').style.display = 'block';
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -314,12 +291,14 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('message').innerText = "Details submitted successfully.";
-                // Optionally, handle further UI changes or navigation
+                document.getElementById('message').innerText = "Details sent successfully.";
+                document.getElementById('extra-info').style.display = 'none';
+                document.getElementById('department-images').style.display = 'none';
+                document.getElementById('send-location-button').style.display = 'block';
             })
             .catch(error => {
                 console.error('Error:', error);
-                document.getElementById('message').innerText = "Failed to submit details.";
+                document.getElementById('message').innerText = "Failed to send details.";
             });
         }
     </script>
