@@ -30,6 +30,14 @@ def images(filename):
         logger.exception(f"Error serving image: {filename}")
         return "Image not found", 404
 
+# Dictionary to store department alerts
+alerts = {
+    "ambulance": "Ambulance",
+    "firefighter": "Firefighter",
+    "rescue": "Rescue",
+    "police": "Police"
+}
+
 # Function to get address from coordinates using OpenCage API
 def get_address_from_coordinates(latitude, longitude):
     try:
@@ -70,18 +78,13 @@ def send_location():
 def send_alert():
     try:
         data = request.json
-        departments = data.get('departments', [])
-        alert_messages = []
-
-        for department in departments:
-            if department in ['ambulance', 'firefighter', 'rescue', 'police']:
-                alert_messages.append(f"Alert sent to {department.capitalize()}")
-            else:
-                logger.warning(f"Invalid department specified: {department}")
-                return jsonify({"status": "Invalid department"}), 400
-
-        logger.info(f"Alert sent to: {', '.join(departments)}")
-        return jsonify({"status": f"Alert sent to: {', '.join(departments)}"})
+        departments = data['departments']  # Expecting a list of departments
+        if all(department in alerts for department in departments):
+            logger.info(f"Alert sent to {', '.join([alerts[department] for department in departments])}")
+            return jsonify({"status": f"Alert sent to {', '.join([alerts[department] for department in departments])}"})
+        else:
+            logger.warning("Invalid department specified")
+            return jsonify({"status": "Invalid department"}), 400
     except Exception as e:
         logger.exception("Error processing alert")
         return jsonify({"status": "Failed to send alert"}), 500
@@ -91,15 +94,18 @@ def send_alert():
 def send_details():
     try:
         data = request.json
-        name = data['name']
-        details = data['details']
-        address = data['address']
+        name = data['name']  # Access 'name' key
+        details = data['details']  # Access 'details' key
+        address = data.get('address', 'Address not provided')  # Optional field
 
         logger.info(f"Details received: Name = {name}, Address = {address}, Problem Details = {details}")
         return jsonify({"status": "Details received"})
+    except KeyError as e:
+        logger.error(f"KeyError: {e}")
+        return jsonify({"status": "error", "message": "Missing data key"}), 400
     except Exception as e:
         logger.exception("Error processing user details")
-        return jsonify({"status": "Failed to receive details"}), 500
+        return jsonify({"status": "error", "message": "Error processing details"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
