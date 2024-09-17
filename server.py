@@ -12,15 +12,7 @@ logger = logging.getLogger(__name__)
 # OpenCage API Key
 OPENCAGE_API_KEY = '0a729828da444deba41bb4888ce3f7bc'
 
-# Dictionary to store department alerts
-alerts = {
-    "ambulance": "Ambulance",
-    "firefighter": "Firefighter",
-    "rescue": "Rescue",
-    "police": "Police"
-}
-
-# Serve the index.html file from the root directory
+# Route to serve the index.html file directly from the main directory
 @app.route('/')
 def index():
     try:
@@ -29,7 +21,7 @@ def index():
         logger.exception("Error serving index.html")
         return "index.html not found", 404
 
-# Serve images from the 'images' directory in the root
+# Route to serve images from the 'images' directory
 @app.route('/images/<path:filename>')
 def images(filename):
     try:
@@ -38,35 +30,39 @@ def images(filename):
         logger.exception(f"Error serving image: {filename}")
         return "Image not found", 404
 
+# Dictionary to store department alerts
+alerts = {
+    "ambulance": "Ambulance",
+    "firefighter": "Firefighter",
+    "rescue": "Rescue",
+    "police": "Police"
+}
+
 # Function to get address from coordinates using OpenCage API
 def get_address_from_coordinates(latitude, longitude):
     try:
         response = requests.get(
-            'https://api.opencagedata.com/geocode/v1/json',
+            f'https://api.opencagedata.com/geocode/v1/json',
             params={
                 'q': f'{latitude},{longitude}',
                 'key': OPENCAGE_API_KEY
             }
         )
-        response.raise_for_status()  # Raises an error for bad HTTP responses
         response_data = response.json()
         if response_data['results']:
             return response_data['results'][0]['formatted']
         return "Address not found"
-    except requests.exceptions.RequestException as e:
-        logger.exception("Error retrieving address from OpenCage API")
+    except Exception as e:
+        logger.exception("Error getting address from OpenCage API")
         return "Error retrieving address"
 
-# Receive and log the location data from the client
+# Route to receive and log the location from the client
 @app.route('/send_location', methods=['POST'])
 def send_location():
     try:
         data = request.json
-        latitude = data.get('latitude')
-        longitude = data.get('longitude')
-
-        if not latitude or not longitude:
-            return jsonify({"status": "Invalid location data"}), 400
+        latitude = data['latitude']
+        longitude = data['longitude']
 
         # Get address from OpenCage API
         address = get_address_from_coordinates(latitude, longitude)
@@ -77,35 +73,31 @@ def send_location():
         logger.exception("Error processing location data")
         return jsonify({"status": "Failed to receive location"}), 500
 
-# Receive and log the department alert
+# Route to receive and log the department alert
 @app.route('/send_alert', methods=['POST'])
 def send_alert():
     try:
         data = request.json
-        department = data.get('department')
+        department = data.get('department', '').lower()  # Convert to lowercase to make it case-insensitive
 
-        if not department or department not in alerts:
-            logger.warning("Invalid department specified")
+        if department in alerts:
+            logger.info(f"Alert sent to {alerts[department]}")
+            return jsonify({"status": f"Alert sent to {alerts[department]}"})
+        else:
+            logger.warning(f"Invalid department specified: {department}")
             return jsonify({"status": "Invalid department"}), 400
-
-        logger.info(f"Alert sent to {alerts[department]}")
-        return jsonify({"status": f"Alert sent to {alerts[department]}"})
     except Exception as e:
         logger.exception("Error processing alert")
         return jsonify({"status": "Failed to send alert"}), 500
 
-# Receive and log user details and problem description
+# Route to receive and log user details and problem description
 @app.route('/send_details', methods=['POST'])
 def send_details():
     try:
         data = request.json
-        name = data.get('name')
-        details = data.get('details')
-        address = data.get('address')
-
-        if not name or not details or not address:
-            logger.warning("Missing user details, problem description, or address")
-            return jsonify({"status": "Invalid details"}), 400
+        name = data['name']
+        details = data['details']
+        address = data['address']
 
         logger.info(f"Details received: Name = {name}, Address = {address}, Problem Details = {details}")
         return jsonify({"status": "Details received"})
