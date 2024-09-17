@@ -52,40 +52,21 @@
             background-color: #e65c00;
         }
 
-        #department-buttons, #extra-info {
-            margin-top: 20px;
-        }
-
-        #department-buttons {
+        .hidden {
             display: none;
         }
 
-        #department-list {
-            max-height: 0;
+        .slide {
             overflow: hidden;
+            max-height: 0;
             transition: max-height 0.5s ease-out;
-            background-color: #ff6f00;
-            color: white;
+            background-color: orange;
             padding: 10px;
             border-radius: 5px;
-            text-align: left;
-            margin: 0 auto;
-            width: 80%;
-            box-sizing: border-box;
         }
 
-        #department-list.show {
-            max-height: 200px; /* Adjust based on content */
-        }
-
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            margin: 10px 0;
-        }
-
-        .checkbox-container input {
-            margin-right: 10px;
+        .slide.show {
+            max-height: 500px; /* Adjust depending on the content size */
         }
 
         #department-images {
@@ -114,18 +95,6 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-
-        #send-alert-button {
-            background-color: #ff6f00;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-            margin: 10px;
-            transition: background-color 0.3s ease;
-        }
     </style>
 </head>
 <body>
@@ -136,39 +105,18 @@
         <div id="form-container">
             <button id="send-location-button" onclick="sendLocation()">Send Location</button>
             <p id="message" class="message"></p>
-            <p id="address" class="message"></p> <!-- Display address -->
+            <p id="address" class="message"></p>
+            <button id="choose-departments-button" class="hidden" onclick="showDepartments()">Choose Departments</button>
         </div>
 
-        <div id="department-buttons">
-            <button id="choose-departments-button" onclick="toggleDepartmentList()">Choose Departments</button>
-            <div id="department-list">
-                <div class="checkbox-container">
-                    <input type="checkbox" id="ambulance" value="ambulance">
-                    <label for="ambulance">Ambulance</label>
-                </div>
-                <div class="checkbox-container">
-                    <input type="checkbox" id="firefighter" value="firefighter">
-                    <label for="firefighter">Firefighter</label>
-                </div>
-                <div class="checkbox-container">
-                    <input type="checkbox" id="rescue" value="rescue">
-                    <label for="rescue">Rescue</label>
-                </div>
-                <div class="checkbox-container">
-                    <input type="checkbox" id="police" value="police">
-                    <label for="police">Police</label>
-                </div>
-            </div>
-            <button id="send-alert-button" onclick="sendAlert()">Send Alert</button>
+        <div id="department-buttons" class="slide">
+            <button onclick="sendAlert('ambulance')">Ambulance</button>
+            <button onclick="sendAlert('firefighter')">Firefighter</button>
+            <button onclick="sendAlert('rescue')">Rescue</button>
+            <button onclick="sendAlert('police')">Police</button>
         </div>
 
-        <div id="extra-info" style="display: none;">
-            <input type="text" id="user-name" placeholder="Your Name">
-            <textarea id="problem-details" placeholder="Describe the problem..."></textarea>
-            <button onclick="sendDetails()">Submit Details</button>
-        </div>
-
-        <div id="department-images" style="display: none;">
+        <div id="department-images" class="hidden">
             <img id="department-image" src="" alt="Department Image">
         </div>
     </div>
@@ -197,9 +145,9 @@
                         document.getElementById('message').innerText = `Location sent: Latitude = ${latitude}, Longitude = ${longitude}`;
                         document.getElementById('address').innerText = `Address: ${address}`;
 
-                        // Hide the send location button and show department buttons
+                        // Hide the send location button and show 'Choose Departments' button
                         document.getElementById('send-location-button').style.display = 'none';
-                        document.getElementById('department-buttons').style.display = 'block';
+                        document.getElementById('choose-departments-button').classList.remove('hidden');
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -213,31 +161,25 @@
             }
         }
 
-        function toggleDepartmentList() {
-            const departmentList = document.getElementById('department-list');
-            departmentList.classList.toggle('show');
+        function showDepartments() {
+            const departmentBox = document.getElementById('department-buttons');
+            departmentBox.classList.add('show'); // Slide down the department buttons
+            document.getElementById('choose-departments-button').classList.add('hidden');
         }
 
-        function sendAlert() {
-            const selectedDepartments = Array.from(document.querySelectorAll('#department-list input[type=checkbox]:checked'))
-                .map(checkbox => checkbox.value);
-
-            if (selectedDepartments.length === 0) {
-                alert("Please select at least one department.");
-                return;
-            }
-
+        function sendAlert(department) {
             fetch('/send_alert', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ departments: selectedDepartments })
+                body: JSON.stringify({ department: department })
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('message').innerText = `Alert sent to ${selectedDepartments.join(', ')}`;
-                
+                document.getElementById('message').innerText = `Alert sent to ${department.charAt(0).toUpperCase() + department.slice(1)} department.`;
+                document.getElementById('department-buttons').classList.remove('show');
+
                 const departmentImages = {
                     ambulance: 'images/ambulance.jpg',
                     firefighter: 'images/firefighter.jpg',
@@ -246,59 +188,12 @@
                 };
 
                 const alertImage = document.getElementById('department-image');
-                document.getElementById('department-images').innerHTML = '';
-                selectedDepartments.forEach(department => {
-                    const img = document.createElement('img');
-                    img.src = departmentImages[department];
-                    img.alt = `${department.charAt(0).toUpperCase() + department.slice(1)} Image`;
-                    img.id = 'department-image';
-                    document.getElementById('department-images').appendChild(img);
-                });
-
-                document.getElementById('department-images').style.display = 'block';
-
-                // Hide department buttons and send alert button
-                document.getElementById('department-buttons').style.display = 'none';
-
-                // Show the extra information section
-                document.getElementById('extra-info').style.display = 'block';
+                alertImage.src = departmentImages[department];
+                document.getElementById('department-images').classList.remove('hidden');
             })
             .catch(error => {
                 console.error('Error:', error);
                 document.getElementById('message').innerText = "Failed to send alert.";
-            });
-        }
-
-        function sendDetails() {
-            const userName = document.getElementById('user-name').value;
-            const problemDetails = document.getElementById('problem-details').value;
-
-            if (!userName || !problemDetails) {
-                alert("Please fill out both fields.");
-                return;
-            }
-
-            fetch('/send_details', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    name: userName,
-                    details: problemDetails,
-                    address: address
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('message').innerText = "Details sent successfully.";
-                document.getElementById('extra-info').style.display = 'none';
-                document.getElementById('department-images').style.display = 'none';
-                document.getElementById('send-location-button').style.display = 'block';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('message').innerText = "Failed to send details.";
             });
         }
     </script>
