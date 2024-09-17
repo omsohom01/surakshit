@@ -3,11 +3,11 @@ import os
 import logging
 import requests
 
-app = Flask(_name_)
+app = Flask(__name__)  # Corrected __name__
 
 # Configure logging to display INFO level messages
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(_name_)
+logger = logging.getLogger(__name__)  # Corrected __name__
 
 # OpenCage API Key
 OPENCAGE_API_KEY = '0a729828da444deba41bb4888ce3f7bc'
@@ -78,10 +78,12 @@ def send_location():
 def send_alert():
     try:
         data = request.json
-        department = data['department']
-        if department in alerts:
-            logger.info(f"Alert sent to {alerts[department]}")
-            return jsonify({"status": f"Alert sent to {alerts[department]}"})
+        departments = data.get('departments', [])
+        selected_alerts = [alerts[department] for department in departments if department in alerts]
+
+        if selected_alerts:
+            logger.info(f"Alert sent to {', '.join(selected_alerts)}")
+            return jsonify({"status": f"Alert sent to {', '.join(selected_alerts)}"})
         else:
             logger.warning("Invalid department specified")
             return jsonify({"status": "Invalid department"}), 400
@@ -104,5 +106,5 @@ def send_details():
         logger.exception("Error processing user details")
         return jsonify({"status": "Failed to receive details"}), 500
 
-if _name_ == '_main_':
+if __name__ == '__main__':  # Corrected __name__
     app.run(debug=True, host='0.0.0.0')
