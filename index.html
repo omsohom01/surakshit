@@ -99,6 +99,7 @@
             height: auto;
             border-radius: 5px;
             display: block;
+            margin: 0 auto;
         }
 
         #extra-info {
@@ -207,8 +208,8 @@
                     .then(data => {
                         // Store the address and display it
                         address = data.address;
-                        document.getElementById('message').innerText = Location sent: Latitude = ${latitude}, Longitude = ${longitude};
-                        document.getElementById('address').innerText = Address: ${address};
+                        document.getElementById('message').innerText = `Location sent: Latitude = ${latitude}, Longitude = ${longitude}`;
+                        document.getElementById('address').innerText = `Address: ${address}`;
 
                         // Hide the send location button and show department buttons
                         document.getElementById('send-location-button').style.display = 'none';
@@ -261,29 +262,29 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('message').innerText = Alert sent to ${selectedDepartments.join(', ')};
+                document.getElementById('message').innerText = `Alert sent to ${selectedDepartments.join(', ')}`;
                 
                 const departmentImages = {
                     ambulance: 'images/ambulance.jpg',
                     firefighter: 'images/firefighter.jpg',
-                    rescue: 'images/rescuer.jpg',
+                    rescue: 'images/rescue.jpg',
                     police: 'images/police.jpg'
                 };
 
-                const imagesContainer = document.getElementById('department-images');
-                imagesContainer.innerHTML = ''; // Clear existing images
+                const ImagesContainer = document.getElementById('department-images');
+                ImagesContainer.innerHTML = ''; // Clear existing images
 
                 selectedDepartments.forEach(department => {
                     const img = document.createElement('img');
                     img.src = departmentImages[department];
                     img.alt = department;
-                    imagesContainer.appendChild(img);
+                    ImagesContainer.appendChild(img);
                 });
 
-                imagesContainer.style.display = 'flex'; // Show the images
-                // Hide department buttons and extra info
-                document.getElementById('department-buttons').style.display = 'none';
+                // Show extra info section
                 document.getElementById('extra-info').style.display = 'block';
+                // Hide department buttons
+                document.getElementById('department-buttons').style.display = 'none';
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -296,7 +297,7 @@
             const problemDetails = document.getElementById('problem-details').value;
 
             if (!userName || !problemDetails) {
-                alert("Please fill in all details.");
+                alert("Please fill out both fields.");
                 return;
             }
 
@@ -305,14 +306,16 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ userName: userName, problemDetails: problemDetails })
+                body: JSON.stringify({
+                    name: userName,
+                    details: problemDetails,
+                    address: address
+                })
             })
             .then(response => response.json())
             .then(data => {
                 document.getElementById('message').innerText = "Details submitted successfully.";
-                
-                // Hide extra info section
-                document.getElementById('extra-info').style.display = 'none';
+                // Optionally, handle further UI changes or navigation
             })
             .catch(error => {
                 console.error('Error:', error);
