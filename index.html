@@ -54,17 +54,22 @@
 
         #department-buttons {
             display: none;
-            overflow: hidden;
-            max-height: 0;
             background-color: #ff6f00;
             border-radius: 10px;
-            padding: 0;
-            transition: max-height 0.5s ease-in-out;
+            padding: 20px;
+            max-width: 600px;
+            margin: 20px auto;
         }
 
-        .expanded {
-            max-height: 300px; /* Enough to show all checkboxes */
-            padding: 20px; /* Padding once expanded */
+        .department-option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px;
+        }
+
+        .checkbox {
+            margin-right: 10px;
         }
 
         #department-images {
@@ -92,17 +97,6 @@
             margin: 10px 0;
             border: 1px solid #ccc;
             border-radius: 5px;
-        }
-
-        .department-option {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 10px;
-        }
-
-        .checkbox {
-            margin-right: 10px;
         }
 
         #extra-info {
@@ -208,7 +202,7 @@
 
         function showDepartments() {
             const departmentButtons = document.getElementById('department-buttons');
-            departmentButtons.classList.add('expanded');
+            departmentButtons.style.display = 'block'; // Ensure it shows up
             document.getElementById('send-alert-button').style.display = 'block'; // Show send alert button
         }
 
@@ -277,11 +271,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    name: userName,
-                    details: problemDetails,
-                    address: address
-                })
+                body: JSON.stringify({ name: userName, problem: problemDetails })
             })
             .then(response => response.json())
             .then(data => {
