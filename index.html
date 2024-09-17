@@ -277,27 +277,28 @@
             });
         }
 
-        function sendDetails() {
-            const userName = document.getElementById('user-name').value;
-            const problemDetails = document.getElementById('problem-details').value;
+      function sendDetails() {
+    const userName = document.getElementById('user-name').value;
+    const problemDetails = document.getElementById('problem-details').value;
 
-            fetch('/send_details', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ userName: userName, problemDetails: problemDetails })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('message').innerText = "Details submitted successfully.";
-                document.getElementById('extra-info').style.display = 'none';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('message').innerText = "Failed to submit details.";
-            });
-        }
+    fetch('/send_details', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: userName, details: problemDetails }) // Use 'name' and 'details'
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('message').innerText = "Details submitted successfully.";
+        document.getElementById('extra-info').style.display = 'none';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('message').innerText = "Failed to submit details.";
+    });
+}
+
     </script>
 </body>
 </html>
