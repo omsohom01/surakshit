@@ -1,7 +1,5 @@
 from flask import Flask, request, jsonify, send_from_directory
-import os
-import logging
-import requests
+
 
 app = Flask(__name__)
 
