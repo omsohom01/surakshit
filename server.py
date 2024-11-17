@@ -1,11 +1,13 @@
 from flask import Flask, request, jsonify, send_from_directory
+import os
+import logging
+import requests
 
-
-app = Flask(__name__)
+app = Flask(_name_)
 
 # Configure logging to display INFO level messages
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(_name_)
 
 # OpenCage API Key
 OPENCAGE_API_KEY = '0a729828da444deba41bb4888ce3f7bc'
@@ -105,5 +107,5 @@ def send_details():
         logger.exception("Error processing user details")
         return jsonify({"status": "error", "message": "Error processing details"}), 500
 
-if __name__ == '__main__':
+if _name_ == '_main_':
     app.run(debug=True, host='0.0.0.0')
