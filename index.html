@@ -3,302 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emergency Alert System</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
-
-        #container {
-            position: relative;
-            width: 80%;
-            margin: 0 auto;
-            padding-top: 20px;
-        }
-
-        h1 {
-            color: #ff6f00;
-        }
-
-        #background-image {
-            width: 100%;
-            max-width: 600px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-
-        #form-container {
-            margin-top: 20px;
-        }
-
-        button {
-            background-color: #ff6f00;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-            margin: 10px;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #e65c00;
-        }
-
-        #department-buttons, #extra-info, #department-images {
-            margin-top: 20px;
-        }
-
-        #department-buttons {
-            display: none;
-        }
-
-        #department-list {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-out;
-            background-color: #ff6f00;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: left;
-            margin: 0 auto;
-            width: 80%;
-            box-sizing: border-box;
-            font-size: 18px; /* Make the text inside the orange box larger */
-        }
-
-        #department-list.show {
-            max-height: 300px; /* Adjust based on content */
-        }
-
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            margin: 10px 0;
-        }
-
-        .checkbox-container input {
-            margin-right: 10px;
-        }
-
-        #department-images {
-            display: none;
-        }
-
-        #department-image {
-            width: 100%;
-            max-width: 400px;
-            height: auto;
-            display: block;
-            margin: 20px auto;
-        }
-
-        .message {
-            color: #ff0000;
-            font-size: 18px;
-            margin-top: 20px;
-        }
-
-        input, textarea {
-            width: 100%;
-            max-width: 400px;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        #send-alert-button {
-            background-color: #ff6f00;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-            margin: 10px;
-            transition: background-color 0.3s ease;
-            display: none; /* Initially hidden */
-        }
-    </style>
+    <title>Stylish Emergency Alert System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="container">
-        <h1>Emergency Alert System</h1>
-        <img id="background-image" src="images/surakshit1.png" alt="Emergency Background">
-
-        <div id="form-container">
-            <button id="send-location-button" onclick="sendLocation()">Send Location</button>
-            <p id="message" class="message"></p>
-            <p id="address" class="message"></p> <!-- Display address -->
-        </div>
-
-        <div id="department-buttons">
-            <button id="choose-departments-button" onclick="toggleDepartmentList()">Choose Departments</button>
-            <div id="department-list">
-                <div class="checkbox-container">
-                    <input type="checkbox" id="ambulance" value="ambulance">
-                    <label for="ambulance">Ambulance</label>
+    <div class="container">
+        <header>
+            <h1>Emergency Alert System</h1>
+        </header>
+        <main>
+            <div class="card">
+                <img id="background-image" src="https://placeholder.co/600x300" alt="Emergency Background" class="hero-image">
+                <div id="location-section">
+                    <button id="send-location-button" class="btn btn-primary">Send Location</button>
+                    <p id="message" class="message"></p>
+                    <p id="address" class="message"></p>
                 </div>
-                <div class="checkbox-container">
-                    <input type="checkbox" id="firefighter" value="firefighter">
-                    <label for="firefighter">Firefighter</label>
+                <div id="department-section" class="hidden">
+                    <h2>Choose Departments</h2>
+                    <div id="department-list">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="ambulance" value="ambulance">
+                            <span class="checkmark"></span>
+                            Ambulance
+                        </label>
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="firefighter" value="firefighter">
+                            <span class="checkmark"></span>
+                            Firefighter
+                        </label>
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="rescue" value="rescue">
+                            <span class="checkmark"></span>
+                            Rescue
+                        </label>
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="police" value="police">
+                            <span class="checkmark"></span>
+                            Police
+                        </label>
+                    </div>
+                    <button id="send-alert-button" class="btn btn-secondary">Send Alert</button>
                 </div>
-                <div class="checkbox-container">
-                    <input type="checkbox" id="rescue" value="rescue">
-                    <label for="rescue">Rescue</label>
-                </div>
-                <div class="checkbox-container">
-                    <input type="checkbox" id="police" value="police">
-                    <label for="police">Police</label>
+                <div id="extra-info" class="hidden">
+                    <input type="text" id="user-name" placeholder="Your Name" required>
+                    <textarea id="problem-details" placeholder="Describe the problem..." required></textarea>
+                    <button id="submit-details-button" class="btn btn-tertiary">Submit Details</button>
                 </div>
             </div>
-            <button id="send-alert-button" onclick="sendAlert()">Send Alert</button>
-        </div>
-
-        <div id="extra-info" style="display: none;">
-            <input type="text" id="user-name" placeholder="Your Name">
-            <textarea id="problem-details" placeholder="Describe the problem..."></textarea>
-            <button onclick="sendDetails()">Submit Details</button>
-        </div>
-
-        <div id="department-images">
-            <img id="department-image" src="" alt="Department Image">
-        </div>
+        </main>
+        <div id="department-images" class="image-gallery hidden"></div>
     </div>
-
-    <script>
-        let address = ""; // Variable to store the address
-
-        function sendLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    const latitude = position.coords.latitude;
-                    const longitude = position.coords.longitude;
-
-                    // Send the coordinates to the server
-                    fetch('/send_location', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ latitude: latitude, longitude: longitude })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Store the address and display it
-                        address = data.address;
-                        document.getElementById('message').innerText = `Location sent: Latitude = ${latitude}, Longitude = ${longitude}`;
-                        document.getElementById('address').innerText = `Address: ${address}`;
-
-                        // Hide the send location button
-                        document.getElementById('send-location-button').style.display = 'none';
-
-                        // Show department buttons
-                        document.getElementById('department-buttons').style.display = 'block';
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        document.getElementById('message').innerText = "Failed to send location.";
-                    });
-                }, function(error) {
-                    document.getElementById('message').innerText = "Error getting location: " + error.message;
-                });
-            } else {
-                document.getElementById('message').innerText = "Geolocation is not supported by this browser.";
-            }
-        }
-
-        function toggleDepartmentList() {
-            const departmentList = document.getElementById('department-list');
-            departmentList.classList.toggle('show');
-            
-            // Show the send alert button after departments are selected
-            document.getElementById('send-alert-button').style.display = 'block';
-        }
-
-        function sendAlert() {
-            const selectedDepartments = Array.from(document.querySelectorAll('#department-list input[type=checkbox]:checked'))
-                .map(checkbox => checkbox.value);
-
-            if (selectedDepartments.length === 0) {
-                alert("Please select at least one department.");
-                return;
-            }
-
-            fetch('/send_alert', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ departments: selectedDepartments })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('message').innerText = `Alert sent to ${selectedDepartments.join(', ')}`;
-                
-                const departmentImages = {
-                    ambulance: 'images/ambulance.jpg',
-                    firefighter: 'images/firefighter.jpg',
-                    rescue: 'images/rescuer.jpg', // Updated to 'rescuer.jpg'
-                    police: 'images/police.jpg'
-                };
-
-                const alertImage = document.getElementById('department-image');
-                document.getElementById('department-images').innerHTML = '';
-                selectedDepartments.forEach(department => {
-                    const img = document.createElement('img');
-                    img.src = departmentImages[department];
-                    img.alt = `${department.charAt(0).toUpperCase() + department.slice(1)} Image`;
-                    img.id = 'department-image';
-                    document.getElementById('department-images').appendChild(img);
-                });
-
-                document.getElementById('department-images').style.display = 'block';
-
-                // Hide department buttons and send alert button
-                document.getElementById('department-buttons').style.display = 'none';
-                document.getElementById('send-alert-button').style.display = 'none';
-
-                // Show the extra information section
-                document.getElementById('extra-info').style.display = 'block';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('message').innerText = "Failed to send alert.";
-            });
-        }
-
-      function sendDetails() {
-    const userName = document.getElementById('user-name').value;
-    const problemDetails = document.getElementById('problem-details').value;
-
-    fetch('/send_details', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ name: userName, details: problemDetails }) // Use 'name' and 'details'
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('message').innerText = "Details submitted successfully.";
-        document.getElementById('extra-info').style.display = 'none';
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        document.getElementById('message').innerText = "Failed to submit details.";
-    });
-}
-
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
